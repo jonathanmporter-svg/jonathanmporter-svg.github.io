@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Image Quiz (Numbered Questions)</title>
+  <title>Image Quiz (Progress Bar)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -48,12 +48,31 @@
     #feedback { margin-top: 15px; font-size: 1.1em; }
     #score { font-size: 1.2em; margin-top: 20px; font-weight: bold; }
     #question-number { font-size: 1.2em; margin-bottom: 10px; font-weight: bold; }
+
+    /* Progress bar styling */
+    #progress-container {
+      width: 100%;
+      background-color: #ddd;
+      border-radius: 6px;
+      margin: 15px 0;
+      height: 20px;
+      overflow: hidden;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #0078d7;
+      transition: width 0.5s ease;
+    }
   </style>
 </head>
 <body>
   <h1>🖼️ Image Quiz</h1>
   <div id="quiz-container">
     <div id="question-number"></div>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
     <img id="question-image" src="" alt="Quiz Image" />
     <div>
       <input type="text" id="answer-input" placeholder="Type your answer here" />
@@ -110,6 +129,11 @@
       return distance <= 2; // allow up to 2 typos
     }
 
+    function updateProgress() {
+      const progress = ((currentQuestion + 1) / quiz.length) * 100;
+      document.getElementById("progress-bar").style.width = progress + "%";
+    }
+
     function loadQuestion() {
       const q = quiz[currentQuestion];
       document.getElementById("question-image").src = q.image;
@@ -118,6 +142,7 @@
       document.getElementById("answer-image").style.display = "none";
       document.getElementById("question-number").textContent =
         `Question ${currentQuestion + 1} of ${quiz.length}`;
+      updateProgress();
     }
 
     function submitAnswer() {
