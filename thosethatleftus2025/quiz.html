@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Image Quiz (Next Button)</title>
+  <title>Image Quiz</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -23,6 +23,12 @@
     h1 { font-size: 1.6em; margin: 0 0 10px; }
     #question-number { font-size: 1.1em; margin-bottom: 8px; font-weight: bold; }
 
+    #answer-image {
+      display: block;
+      margin: 12px auto; /* centers horizontally */
+    }
+
+    
     /* Progress bar */
     #progress-container {
       width: 100%;
@@ -77,6 +83,7 @@
 
     #feedback { margin-top: 12px; font-size: 1.05em; min-height: 1.4em; }
     #score { font-size: 1.1em; margin-top: 14px; font-weight: bold; }
+    #answer-text { margin-top: 8px; font-size: 1.1em; font-weight: bold; }
 
     @media (max-width: 480px) {
       h1 { font-size: 1.4em; }
@@ -93,7 +100,6 @@
     <img id="question-image" src="" alt="Quiz Image" />
 
     <div class="controls">
-      <!-- Not inside a form to avoid auto-submit -->
       <input type="text" id="answer-input" placeholder="Type your answer here" />
       <button id="submit-button" type="button" onclick="submitAnswer()">Submit</button>
       <button id="next-button" type="button" onclick="nextQuestion()" style="display:none;">Next Question</button>
@@ -101,7 +107,7 @@
 
     <div id="feedback"></div>
     <img id="answer-image" src="" alt="Answer Image" style="display:none;" />
-    <div id="answer-text" style="margin-top:8px; font-size:1.1em; font-weight:bold;"></div>
+    <div id="answer-text"></div>
     <div id="score">Score: 0</div>
   </div>
 
@@ -131,6 +137,146 @@
         image: "images/dianekeaton.png",
         answer: "Diane Keaton",
         answerImage: "images/dianekeatona.avif"
+      },
+      {
+        image: "images/dickiebird.png",
+        answer: "Dickie Bird",
+        answerImage: "images/dickiebirda.webp"
+      },
+      {
+        image: "images/rickyhatton.png",
+        answer: "Ricky Hatton",
+        answerImage: "images/rickyhattona.jpg"
+      },
+      {
+        image: "images/cleolane.png",
+        answer: "Cleo Lane",
+        answerImage: "images/cleolanea.webp"
+      },
+      {
+        image: "images/tomstoppard.png",
+        answer: "Tom Stoppard",
+        answerImage: "images/tomstopparda.jpg"
+      },
+      {
+        image: "images/normantebbit.png",
+        answer: "Norman Tebbit",
+        answerImage: "images/normantebbita.jpg"
+      },
+      {
+        image: "images/sandygall.png",
+        answer: "Sandy Gall",
+        answerImage: "images/sandygalla.jpeg"
+      },
+      {
+        image: "images/thevivienne.png",
+        answer: "The Vivienne",
+        answerImage: "images/theviviennea.webp"
+      },
+      {
+        image: "images/robertredford.png",
+        answer: "Robert Redford",
+        answerImage: "images/robertredforda.jpg"
+      },
+      {
+        image: "images/quentinwilson.png",
+        answer: "Quentin Wilson",
+        answerImage: "images/quentinwilsona.jpg"
+      },
+      {
+        image: "images/charliekirk.png",
+        answer: "Charlie Kirk",
+        answerImage: "images/charliekirka.avif"
+      },
+      {
+        image: "images/frederickforsyth.png",
+        answer: "Frederick Forsyth",
+        answerImage: "images/frederickforsytha.webp"
+      },
+      {
+        image: "images/duchessofkent.png",
+        answer: "Duchess of Kent",
+        answerImage: "images/duchessofkenta.webp"
+      },
+      {
+        image: "images/kimwoodburn.png",
+        answer: "Kim Woodburn",
+        answerImage: "images/kimwoodburna.jpg"
+      },
+      {
+        image: "images/henrykelly.png",
+        answer: "Henry Kelly",
+        answerImage: "images/henrykellya.avif"
+      },
+      {
+        image: "images/giorgioarmani.png",
+        answer: "Giorgio Armani",
+        answerImage: "images/giorgioarmania.jpg"
+      },
+      {
+        image: "images/valkilmer.png",
+        answer: "Val Kilmer",
+        answerImage: "images/valkilmera.jpg"
+      },
+      {
+        image: "images/slystone.png",
+        answer: "Sly Stone",
+        answerImage: "images/slystonea.webp"
+      },
+      {
+        image: "images/brianwilson.png",
+        answer: "Brian Wilson",
+        answerImage: "images/brianwilsona.webp"
+      },
+      {
+        image: "images/janegoodall.png",
+        answer: "Jane Goodall",
+        answerImage: "images/janegoodalla.avif"
+      },
+      {
+        image: "images/hulkhogan.png",
+        answer: "Hulk Hogan",
+        answerImage: "images/hulkhogana.avif"
+      },
+      {
+        image: "images/terencestamp.png",
+        answer: "Terence Stamp",
+        answerImage: "images/terencestampa.avif"
+      },
+      {
+        image: "images/dickcheney.png",
+        answer: "Dick Cheney",
+        answerImage: "images/dickcheneya.jpg"
+      },
+      {
+        image: "images/denislaw.png",
+        answer: "Denis Law",
+        answerImage: "images/denislawa.jpg"
+      },
+      {
+        image: "images/mariannefaithfull.png",
+        answer: "Marianne Faithfull",
+        answerImage: "images/mariannefaithfulla.jpg"
+      },
+      {
+        image: "images/agakhaniv.png",
+        answer: "Aga Khan IV",
+        answerImage: "images/agakhaniva.jpg"
+      },
+      {
+        image: "images/jackvettriano.png",
+        answer: "Jack Vettriano",
+        answerImage: "images/jackvettrianoa.jpg"
+      },
+      {
+        image: "images/joanplowright.png",
+        answer: "Joan Plowright",
+        answerImage: "images/joanplowrighta.jpg"
+      },
+      {
+        image: "images/genehackman.png",
+        answer: "Gene Hackman",
+        answerImage: "images/genehackmana.jpg"
       }
     ];
 
@@ -172,64 +318,49 @@
       document.getElementById("answer-input").value = "";
       document.getElementById("feedback").textContent = "";
       document.getElementById("answer-image").style.display = "none";
+      document.getElementById("answer-text").textContent = "";
       document.getElementById("question-number").textContent =
         `Question ${currentQuestion + 1} of ${quiz.length}`;
       document.getElementById("next-button").style.display = "none";
+      document.getElementById("next-button").textContent = "Next Question";
       document.getElementById("submit-button").disabled = false;
       updateProgress();
     }
 
-function submitAnswer() {
-  const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
-  const correctAnswer = quiz[currentQuestion].answer.toLowerCase();
+    function submitAnswer() {
+      const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
+      const correctAnswer = quiz[currentQuestion].answer.toLowerCase();
 
-  if (isCloseEnough(userAnswer, correctAnswer)) {
-    score++;
-    document.getElementById("feedback").textContent = "✅ Correct!";
-  } else {
-    document.getElementById("feedback").textContent =
-      `❌ Incorrect. The correct answer was "${quiz[currentQuestion].answer}".`;
-  }
-
-  document.getElementById("score").textContent = `Score: ${score}`;
-
-  // Show the answer image
-  const answerImg = document.getElementById("answer-image");
-  answerImg.src = quiz[currentQuestion].answerImage;
-  answerImg.style.display = "block";
-
-  // Show the answer text underneath the image
-  document.getElementById("answer-text").textContent =
-    `Answer: ${quiz[currentQuestion].answer}`;
-
-  document.getElementById("submit-button").disabled = true;
-
-  // If last question, change button text
-  if (currentQuestion === quiz.length - 1) {
-    document.getElementById("next-button").textContent = "Get Final Scores";
-  }
-
-  document.getElementById("next-button").style.display = "inline-block";
-}
-
+      if (isCloseEnough(userAnswer, correctAnswer)) {
+        score++;
+        document.getElementById("feedback").textContent = "✅ Correct!";
+      } else {
+        document.getElementById("feedback").textContent =
+          `❌ Incorrect. The correct answer was "${quiz[currentQuestion].answer}".`;
+      }
 
       document.getElementById("score").textContent = `Score: ${score}`;
 
-      // Show the answer image and Next button
+      // Show the answer image and text
       const answerImg = document.getElementById("answer-image");
       answerImg.src = quiz[currentQuestion].answerImage;
       answerImg.style.display = "block";
+      document.getElementById("answer-text").textContent =
+        `Answer: ${quiz[currentQuestion].answer}`;
 
-      // Prevent double submissions
       document.getElementById("submit-button").disabled = true;
 
-      // Show Next button only after submission
+      // If last question, change button text
+      if (currentQuestion === quiz.length - 1) {
+        document.getElementById("next-button").textContent = "Get Final Scores";
+      }
+
       document.getElementById("next-button").style.display = "inline-block";
     }
 
     function nextQuestion() {
-      currentQuestion++;
-      if (currentQuestion < quiz.length) {
+      if (currentQuestion < quiz.length - 1) {
+        currentQuestion++;
         loadQuestion();
       } else {
         document.getElementById("quiz-container").innerHTML =
@@ -241,8 +372,3 @@ function submitAnswer() {
   </script>
 </body>
 </html>
-
-
-
-
-
