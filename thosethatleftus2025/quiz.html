@@ -85,7 +85,7 @@
   </style>
 </head>
 <body>
-  <h1>Those that left us 2025</h1>
+  <h1>🖼️ Image Quiz</h1>
   <div id="quiz-container">
     <div id="question-number"></div>
     <div id="progress-container"><div id="progress-bar"></div></div>
@@ -101,31 +101,25 @@
 
     <div id="feedback"></div>
     <img id="answer-image" src="" alt="Answer Image" style="display:none;" />
-    <div id="answer-text" style="margin-top:8px; font-size:1.1em; font-weight:bold;"></div>
     <div id="score">Score: 0</div>
   </div>
 
   <script>
     const quiz = [
       {
-        image: "images/ozzyosborne.jpg",
-        answer: "Ozzy Osborne",
-        answerImage: "images/ozzy-osbourne-portrait-session.jpg"
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Fronalpstock_big.jpg/640px-Fronalpstock_big.jpg",
+        answer: "mountain",
+        answerImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Matterhorn_from_Domh%C3%BCtte_-_2.jpg/640px-Matterhorn_from_Domh%C3%BCtte_-_2.jpg"
       },
       {
-        image: "images/jillycooper.jpg",
-        answer: "Jilly Cooper",
-        answerImage: "images/jilly-cooper-obit_7043832.jpg"
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/640px-PNG_transparency_demonstration_1.png",
+        answer: "chess",
+        answerImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Chess_board_opening_staunton.jpg/640px-Chess_board_opening_staunton.jpg"
       },
       {
-        image: "images/dickiebird.png",
-        answer: "Dickie Bird",
-        answerImage: "images/dickiebirda.jpg"
-      },
-      {
-        image: "images/dianekeaton.png",
-        answer: "Diane Keaton",
-        answerImage: "images/220814151830-diane-keaton-2022-tcl-chinese-theatre.jpg"
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Golde33443.jpg/640px-Golde33443.jpg",
+        answer: "cat",
+        answerImage: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/640px-Cat03.jpg"
       }
     ];
 
@@ -174,39 +168,31 @@
       updateProgress();
     }
 
-function submitAnswer() {
-  const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
-  const correctAnswer = quiz[currentQuestion].answer.toLowerCase();
+    function submitAnswer() {
+      const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
+      const correctAnswer = quiz[currentQuestion].answer.toLowerCase();
 
-  if (isCloseEnough(userAnswer, correctAnswer)) {
-    score++;
-    document.getElementById("feedback").textContent = "✅ Correct!";
-  } else {
-    document.getElementById("feedback").textContent =
-      `❌ Incorrect. The correct answer was "${quiz[currentQuestion].answer}".`;
-  }
+      if (isCloseEnough(userAnswer, correctAnswer)) {
+        score++;
+        document.getElementById("feedback").textContent = "✅ Correct!";
+      } else {
+        document.getElementById("feedback").textContent =
+          `❌ Incorrect. The correct answer was "${quiz[currentQuestion].answer}".`;
+      }
 
-  document.getElementById("score").textContent = `Score: ${score}`;
+      document.getElementById("score").textContent = `Score: ${score}`;
 
-  // Show the answer image
-  const answerImg = document.getElementById("answer-image");
-  answerImg.src = quiz[currentQuestion].answerImage;
-  answerImg.style.display = "block";
+      // Show the answer image and Next button
+      const answerImg = document.getElementById("answer-image");
+      answerImg.src = quiz[currentQuestion].answerImage;
+      answerImg.style.display = "block";
 
-  // Show the answer text underneath the image
-  document.getElementById("answer-text").textContent =
-    `Answer: ${quiz[currentQuestion].answer}`;
+      // Prevent double submissions
+      document.getElementById("submit-button").disabled = true;
 
-  document.getElementById("submit-button").disabled = true;
-
-  // If last question, change button text
-  if (currentQuestion === quiz.length - 1) {
-    document.getElementById("next-button").textContent = "Get Final Scores";
-  }
-
-  document.getElementById("next-button").style.display = "inline-block";
-}
-
+      // Show Next button only after submission
+      document.getElementById("next-button").style.display = "inline-block";
+    }
 
     function nextQuestion() {
       currentQuestion++;
@@ -222,13 +208,5 @@ function submitAnswer() {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
