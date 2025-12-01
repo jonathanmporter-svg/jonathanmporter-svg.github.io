@@ -101,6 +101,7 @@
 
     <div id="feedback"></div>
     <img id="answer-image" src="" alt="Answer Image" style="display:none;" />
+    <div id="answer-text" style="margin-top:8px; font-size:1.1em; font-weight:bold;"></div>
     <div id="score">Score: 0</div>
   </div>
 
@@ -119,7 +120,17 @@
       {
         image: "images/jillycooper.jpg",
         answer: "Jilly Cooper",
-        answerImage: "jillycoopera.jpg"
+        answerImage: "images/jillycoopera.jpg"
+      },
+      {
+        image: "images/patriciaroutledge.jpg",
+        answer: "Patricia Routledge",
+        answerImage: "images/patriciaroutledgea.avif"
+      },
+      {
+        image: "images/dianekeaton.png",
+        answer: "Diane Keaton",
+        answerImage: "images/dianekeatona.avif"
       }
     ];
 
@@ -168,17 +179,39 @@
       updateProgress();
     }
 
-    function submitAnswer() {
-      const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
-      const correctAnswer = quiz[currentQuestion].answer.toLowerCase();
+function submitAnswer() {
+  const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
+  const correctAnswer = quiz[currentQuestion].answer.toLowerCase();
 
-      if (isCloseEnough(userAnswer, correctAnswer)) {
-        score++;
-        document.getElementById("feedback").textContent = "✅ Correct!";
-      } else {
-        document.getElementById("feedback").textContent =
-          `❌ Incorrect. The correct answer was "${quiz[currentQuestion].answer}".`;
-      }
+  if (isCloseEnough(userAnswer, correctAnswer)) {
+    score++;
+    document.getElementById("feedback").textContent = "✅ Correct!";
+  } else {
+    document.getElementById("feedback").textContent =
+      `❌ Incorrect. The correct answer was "${quiz[currentQuestion].answer}".`;
+  }
+
+  document.getElementById("score").textContent = `Score: ${score}`;
+
+  // Show the answer image
+  const answerImg = document.getElementById("answer-image");
+  answerImg.src = quiz[currentQuestion].answerImage;
+  answerImg.style.display = "block";
+
+  // Show the answer text underneath the image
+  document.getElementById("answer-text").textContent =
+    `Answer: ${quiz[currentQuestion].answer}`;
+
+  document.getElementById("submit-button").disabled = true;
+
+  // If last question, change button text
+  if (currentQuestion === quiz.length - 1) {
+    document.getElementById("next-button").textContent = "Get Final Scores";
+  }
+
+  document.getElementById("next-button").style.display = "inline-block";
+}
+
 
       document.getElementById("score").textContent = `Score: ${score}`;
 
@@ -208,6 +241,7 @@
   </script>
 </body>
 </html>
+
 
 
 
