@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image + Text Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 5%;
+      margin: 0;
+      background: #f9f9f9;
+    }
+    #quiz-container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 640px;
+      margin: auto;
+    }
+    h1 { font-size: 1.6em; margin: 0 0 10px; }
+    #question-number { font-size: 1.1em; margin-bottom: 8px; font-weight: bold; }
+
+    /* Progress bar */
+    #progress-container {
+      width: 100%;
+      background-color: #ddd;
+      border-radius: 6px;
+      margin: 12px 0;
+      height: 18px;
+      overflow: hidden;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #0078d7;
+      transition: width 0.4s ease;
+    }
+
+    /* Images */
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 12px auto;
+      border-radius: 6px;
+      display: block; /* ensures centering with auto margins */
+    }
+    /* Explicitly center the second (answer) image */
+    #answer-image {
+      display: block;
+      margin: 12px auto;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      width: 90%;
+      max-width: 380px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 12px 18px;
+      font-size: 1em;
+      border: none;
+      border-radius: 6px;
+      background: #0078d7;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover { background: #005fa3; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    #question-text { margin-top: 8px; font-size: 2.05em; font-style: italic; }
+    #feedback { margin-top: 12px; font-size: 1.05em; min-height: 1.4em; }
+    #answer-text { margin-top: 8px; font-size: 1.1em; font-weight: bold; text-align: center; }
+    #score { font-size: 1.1em; margin-top: 14px; font-weight: bold; }
+    #answer-text {
+        white-space: pre-line; /* respects \n as line breaks */
+    }
+
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.4em; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Graham's Quiz - Guess the event from the last 60 years</h1>
+  <div id="quiz-container">
+    <div id="question-number"></div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
+
+    <!-- Question block: image + text -->
+    <img id="question-image" src="" alt="Question image" />
+    <div id="question-text"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <input type="text" id="answer-input" placeholder="Type your answer here" />
+      <button id="submit-button" type="button" onclick="submitAnswer()">Submit</button>
+      <button id="next-button" type="button" onclick="nextQuestion()" style="display:none;">Next Question</button>
+    </div>
+
+    <!-- Feedback + Answer block: image + text -->
+    <div id="feedback"></div>
+    <img id="answer-image" src="" alt="Answer image" style="display:none;" />
+    <div id="answer-text"></div>
+
+    <div id="score">Score: 0</div>
+  </div>
+
+  <script>
+    const quiz = [
+      {
+        image: "images/1965.png",
+        questionText: "29th December 1965",
+        answers: ["Thunderball"],   
+        answerImage: "images/1965a.jpg",
+        answerText: "Thunderball is a 1965 spy film and the fourth in the James Bond series produced by Eon Productions, starring Sean Connery as the fictional MI6 agent James Bond. UK release 29 December 1965"
+      },
+      {
+        image: "images/1966.png",
+        questionText: "21st October 1966",
+        answers: ["Aberfan", "Aberfan Disaster"],   
+        answerImage: "images/1966a.jpg",
+        answerText: "The Aberfan disaster was the catastrophic collapse of a colliery spoil tip on 21 October 1966"
+      },
+      {
+        image: "images/1967.png",
+        questionText: "26th May 1967",
+        answers: ["Sgt. Pepper's", "Sgt. Pepper's Lonely Hearts Club Band"],
+        answerImage: "images/1967a.jpg",
+        answerText: "Sgt. Pepper's Lonely Hearts Club Band (often referred to simply as Sgt. Pepper) the eighth studio album by the English rock band the Beatles. Released on 26 May 1967"
+      },
+      {
+        image: "images/1968.png",
+        questionText: "5th Jan- 21st Aug 1968",        
+        answers: ["Prague Spring"],
+        answerImage: "images/1968a.jpg",
+        answerText: "The Prague Spring  was a period of political liberalization and mass protest in the Czechoslovak Socialist Republic. It began on 5 January 1968, when reformist Alexander Dubček was elected First Secretary of the Communist Party of Czechoslovakia (KSČ), and continued until 21 August 1968, when the Soviet Union and three other Warsaw Pact members (Bulgaria, Hungary and Poland) invaded the country to suppress the reforms."
+      },
+      {
+        image: "images/1969.png",
+        questionText: "July 20th 1969",
+        answers: ["First Moon Landing","Neil Armstrong and Buzz Aldrin","Neil Armstrong Buzz Aldrin"],
+        answerImage: "images/1969a.webp",
+        answerText: "Apollo 11 was the first spaceflight to land humans on the Moon, conducted by NASA from July 16 to 24, 1969. Commander Neil Armstrong and Lunar Module Pilot Edwin 'Buzz' Aldrin landed the Lunar Module Eagle on July 20 at 20:17 UTC"
+      },
+      {
+        image: "images/1970.png",
+        questionText: "1st Jan 1970 00:00:00",        
+        answers: ["Unix Time"],
+        answerImage: "images/1970a.jpg",
+        answerText: "Unix time is a date and time representation widely used in computing. It measures time by the number of non-leap seconds that have elapsed since 00:00:00 UTC on 1 January 1970, the Unix epoch"
+      },
+      {
+        image: "images/1971.png",
+        questionText: "15th Feb 1971",        
+        answers: ["Decimal Day","Decimalisation"],
+        answerImage: "images/1971a.jpg",
+        answerText: "Decimal Day  in the United Kingdom and in Ireland was Monday 15 February 1971, the day on which each country decimalised its respective currency of pounds, shillings, and pence."
+      },
+      {
+        image: "images/1972.png",
+        questionText: "30th Jan 1972",        
+        answers: ["Bloody Sunday","Bogside Massacre"],
+        answerImage: "images/1972a.jpg",
+        answerText: "Bloody Sunday, or the Bogside Massacre was a massacre on 30 January 1972 when British soldiers shot 26 unarmed civilians during a protest march in the Bogside area of Derry, Northern Ireland."
+      },
+      {
+        image: "images/1973.png",
+        questionText: "22nd Jan 1973",        
+        answers: ["Roe v. Wade"],
+        answerImage: "images/1973a.webp",
+        answerText: "Roe v. Wade, 410 U.S. 113 (1973) was a landmark decision of the U.S. Supreme Court in which the Court ruled that the Constitution of the United States protected the right to have an abortion prior to the point of fetal viability."
+      },
+      {
+        image: "images/1974.png",
+        questionText: "22nd Jan 1973",        
+        answers: ["Terracotta Army"],
+        answerImage: "images/1974a.jpg",
+        answerText: "The Terracotta Army was discovered on 29 March 1974 by a group of farmers—Yang Zhifa, his five brothers, and neighbour Wang Puzhi—who were digging a well approximately 1.5 km (0.93 mi) east of the Qin Emperor's tomb mound at Mount Li"
+      },
+      {
+        image: "images/1975.png",
+        questionText: "4th Apr 1975",        
+        answers: ["Microsoft","Microsoft founded"],
+        answerImage: "images/1975a.webp",
+        answerText: "Microsoft was founded by Bill Gates and Paul Allen to market BASIC interpreters for the Altair 8800."
+      },
+      {
+        image: "images/1976.png",
+        questionText: "21st January 1976",        
+        answers: ["Flight of Concorde","First Concorde Flight","First Commercial Concorde Flight"],
+        answerImage: "images/1976a.jpg",
+        answerText: "Concorde entered service on 21 January 1976 with Air France from Paris-Roissy and British Airways from London Heathrow."
+      },      
+      {
+        image: "images/1977.png",
+        questionText: "May 25th 1977",        
+        answers: ["Star Wars"],
+        answerImage: "images/1977a.jpg",
+        answerText: "Star Wars (also known as Star Wars: Episode IV – A New Hope) is a 1977 American epic space opera film written and directed by George Lucas, produced by Lucasfilm Ltd. and released by Twentieth Century-Fox. It is the first film in the Star Wars franchise and the fourth chronological chapter of the 'Skywalker Saga'"
+      },
+      {
+        image: "images/1978.png",
+        questionText: "25th July 1978",        
+        answers: ["Louise Brown Born","First Test Tube baby born","First Test Tube baby","First IVF baby","louise brown"],
+        answerImage: "images/1978a.jpg",
+        answerText: "Louise Joy Brown (born 25 July 1978) is an English woman noted as the first human born following conception by in vitro fertilisation (IVF). Her birth, following a procedure pioneered in Britain, has been lauded among 'the most remarkable medical breakthroughs of the 20th century'."
+      },
+      {
+        image: "images/1979.png",
+        questionText: "4th May 1979",        
+        answers: ["Margaret Thatcher","Margaret Thatcher First Female Prime Minister","First Female Prime Minister"],
+        answerImage: "images/1979a.jpg",
+        answerText: "Thatcher became prime minister on 4 May 1979. Arriving at Downing Street she said, paraphrasing the Prayer of Saint Francis:\nWhere there is discord, may we bring harmony;\nWhere there is error, may we bring truth;\nWhere there is doubt, may we bring faith;\nAnd where there is despair, may we bring hope."
+      },
+      {
+        image: "images/1980.png",
+        questionText: "18th May 1980",        
+        answers: ["Mount Saint Helens","Mount Saint Helens erupts","Mt Saint Helens","Mt Saint Helens erupts","Mount St. Helens erupted","Mt st. helens","mount st. helens"],
+        answerImage: "images/1980a.jpg",
+        answerText: "In March 1980, a series of volcanic explosions and pyroclastic flows began at Mount St. Helens in Skamania County, Washington, United States. A series of phreatic blasts occurred from the summit and escalated for nearly two months until a catastrophic, major explosive eruption took place on May 18, 1980, at 8:32 a.m."
+      },
+      {
+        image: "images/1981.png",
+        questionText: "30th Mar 1981",        
+        answers: ["Ronald Reagan","Ronald Reagan attempted assassination","ronald reagan shot"],
+        answerImage: "images/1981a.avif",
+        answerText: "On March 30, 1981, Ronald Reagan, the president of the United States, was shot and wounded by John Hinckley Jr. in Washington, D.C., as Reagan was returning to his limousine after a speaking engagement at the Washington Hilton hotel. Hinckley believed the attack would impress the actress Jodie Foster, with whom he had developed an erotomanic obsession after viewing her in the 1976 film Taxi Driver"
+      },
+      {
+        image: "images/1982.png",
+        questionText: "2nd April – 14th June 1982",        
+        answers: ["Falklands Conflict","Falklands War","Falklands"],
+        answerImage: "images/1982a.jpg",
+        answerText: "The Falklands War (Spanish: Guerra de las Malvinas) was a ten-week undeclared war between Argentina and the United Kingdom in 1982 over two British Overseas Territories in the South Atlantic: the Falkland Islands and its territorial dependency, South Georgia and the South Sandwich Islands. The conflict began on 2 April 1982, when Argentina invaded and occupied the Falkland Islands, followed by the invasion of South Georgia the next day. On 5 April the British government dispatched a naval task force to engage the Argentine Navy and Air Force before making an amphibious assault on the islands. The conflict lasted 74 days and ended with an Argentine surrender on 14 June, returning the islands to British control. In total, 649 Argentine military personnel, 255 British military personnel and three Falkland Islanders were killed during the hostilities."
+      },
+      {
+        image: "images/1983.png",
+        questionText: "26th November 1983",        
+        answers: ["Brink's-Mat Robbery","Brinks Mat","Brinks Mat Robbery"],
+        answerImage: "images/1983a.avif",
+        answerText: "The Brink's-Mat robbery was one of the largest robberies in British history, with £26 million (1983) (equivalent to £290 million or $390 million based on the LBMA afternoon Gold Fix October 8, 2025[1]) worth of gold bullion, diamonds, and cash stolen. It occurred at the Heathrow International Trading Estate, London, on 26 November 1983, from a warehouse operated by Brink's-Mat, a former joint venture between US security company Brink's and London-based company MAT Transport."
+      },
+      {
+        image: "images/1984.png",
+        questionText: "24th Jan 1984",        
+        answers: ["Apple Macintosh Launched","Apple Mac Launched","Apple Mac","Apple Macintosh"],
+        answerImage: "images/1984a.jpg",
+        answerText: "The first Macintosh computer was introduced by Apple on January 24, 1984, following a famous '1984' Super Bowl commercial. The computer, which was the first commercially successful personal computer to feature a mouse and a graphical user interface, was launched by Steve Jobs at a special event for shareholders."
+      },
+      {            
+        image: "images/1985.png",
+        questionText: "13th July 1985",        
+        answers: ["Live Aid"],
+        answerImage: "images/1985a.jpg",
+        answerText: "Live Aid was a two-venue benefit concert and music-based fundraising initiative held on Saturday, 13 July 1985. The event was organised by Bob Geldof and Midge Ure to raise further funds for relief of the 1983–1985 famine in Ethiopia, a movement that started with the release of the successful charity single 'Do They Know It's Christmas?' in December 1984. Billed as the 'global jukebox', Live Aid was held simultaneously at Wembley Stadium in London and John F. Kennedy Stadium in Philadelphia. On the same day, concerts inspired by the initiative were held in other countries, such as the Soviet Union, Canada, Japan, Yugoslavia, Austria, Australia, and West Germany. It was one of the largest satellite link-ups and television broadcasts of all time. An estimated audience of 1.9 billion people in 150 nations watched the live broadcast, nearly 40 per cent of the world population"
+      },
+      {
+        image: "images/1986.png",
+        questionText: "26th Apr 1986",        
+        answers: ["Chernobyl disaster","Chernobyl"],
+        answerImage: "images/1986a.webp",
+        answerText: "On 26 April 1986, the no. 4 reactor of the Chernobyl Nuclear Power Plant, located near Pripyat, Ukrainian SSR, Soviet Union (now Ukraine), exploded. With dozens of direct casualties, it is one of only two nuclear energy accidents rated at the maximum severity on the International Nuclear Event Scale, the other being the 2011 Fukushima nuclear accident. The response involved more than 500,000 personnel and cost an estimated 18 billion rubles (about $84.5 billion USD in 2025).It remains the worst nuclear disaster and the most expensive disaster in history, with an estimated cost of US$700 billion."
+      },
+      {
+        image: "images/1987.png",
+        questionText: "19th Aug 1987",        
+        answers: ["Hungerford","Hungerford Massacre"],
+        answerImage: "images/1987a.webp",
+        answerText: "The Hungerford massacre was a spree shooting in Wiltshire and Berkshire, England, which occurred on 19 August 1987 when 27-year-old Michael Ryan shot and killed sixteen people, including his mother and an unarmed police officer, before killing himself. No motive for the killings was established."
+      },
+      {
+        image: "images/1988.png",
+        questionText: "21st December 1988",        
+        answers: ["Lockerbie","Lockerbie Bombing","Pan Am Flight 103"],
+        answerImage: "images/1988a.jpg",
+        answerText: "Pan Am Flight 103 was a regularly scheduled Pan Am transatlantic flight from Frankfurt to Detroit via a stopover in London and another in New York City. Shortly after 19:00 on 21 December 1988, the Boeing 747 Clipper Maid of the Seas was destroyed by a bomb while flying over the Scottish town of Lockerbie, killing all 243 passengers and 16 crew aboard.[1] Large sections of the aircraft crashed in a residential street in Lockerbie, killing 11 residents. With a total of 270 fatalities, the event, which became known as the Lockerbie bombing, is the deadliest terrorist attack in the history of the United Kingdom."
+      },
+      {
+        image: "images/1989.png",
+        questionText: "9th Nov 1989",        
+        answers: ["Berlin Wall Fall","Fall of Berlin Wall","Berlin Wall"],
+        answerImage: "images/1989a.jpg",
+        answerText: "The Berlin Wall fell on 9 November 1989 during the Peaceful Revolution, marking the beginning of the destruction of the figurative Iron Curtain, as East Berlin transit restrictions were overwhelmed and discarded. Sections of the wall were breached, and planned deconstruction began the following June. It was one of the series of events that started the fall of communism in Central and Eastern Europe. The fall of the inner German border took place shortly afterward. An end to the Cold War was declared at the Malta Summit in early December, and German reunification took place in October the following year."
+      },
+      {
+        image: "images/1990.png",
+        questionText: "11th Feb 1990",        
+        answers: ["Nelson Mandela","Nelson Mandela Released"],
+        answerImage: "images/1990a.webp",
+        answerText: "Nelson Mandela was released from prison on February 11, 1990, after 27 years of incarceration for his anti-apartheid activism, a pivotal moment that symbolized the end of South Africa's apartheid system and ushered in its transition to democracy, culminating in his election as the country's first Black president"
+      },
+      {
+        image: "images/1991.png",
+        questionText: "30th Jan 1991",        
+        answers: ["Silence of the Lambs","Silence of the Lambs released"],
+        answerImage: "images/1991a.jpg",
+        answerText: "The Silence of the Lambs is a 1991 American psychological horror thriller film directed by Jonathan Demme and written by Ted Tally, adapted from Thomas Harris's 1988 novel. It stars Jodie Foster as Clarice Starling, a young FBI trainee who is hunting a serial killer known as 'Buffalo Bill' (Ted Levine), who skins his female victims. To catch him, she seeks the advice of the imprisoned Hannibal Lecter (Anthony Hopkins), a brilliant psychiatrist and cannibalistic serial murderer."
+      },
+      {
+        image: "images/1992.png",
+        questionText: "7th Feb 1992",        
+        answers: ["Maastricht Treaty signed","Masstricht Treaty"],
+        answerImage: "images/1992a.jpg",
+        answerText: "The Treaty on European Union, commonly known as the Maastricht Treaty, is the foundation treaty of the European Union (EU). Concluded in 1992 between the then-twelve member states of the European Communities, it announced 'a new stage in the process of European integration' chiefly in provisions for a shared European citizenship, for the eventual introduction of a single currency, and (with less precision) for common foreign and security policies, and a number of changes to the European institutions and their decision-making procedures, not least a strengthening of the powers of the European Parliament and more majority voting on the Council of Ministers. Although these were seen by many to presage a 'federal Europe', key areas remained inter-governmental with national governments collectively taking key decisions. This constitutional debate continued through the negotiation of subsequent treaties, culminating in the 2007 Treaty of Lisbon."
+      },
+      {
+        image: "images/1993.png",
+        questionText: "26th Feb 1993",        
+        answers: ["World Trade Centre","World Trade Centre Bombing"],
+        answerImage: "images/1993a.jpg",
+        answerText: "On February 26, 1993, Ramzi Yousef and associates carried out a van bomb terrorist attack below the North Tower of the World Trade Center in New York City. The 1,336 lb (606 kg) urea nitrate–hydrogen gas enhanced device was intended to make the North Tower collapse onto the South Tower, taking down both skyscrapers and killing tens of thousands of people. While it failed to do so, it killed six people, including a pregnant woman,and caused over a thousand injuries. About 50,000 people were evacuated from the buildings that day."
+      },
+      {
+        image: "images/1994.png",
+        questionText: "Sept 10th 1994",        
+        answers: ["The Shawshank Redemption","Shawshank Redemption"],
+        answerImage: "images/1994a.jpg",
+        answerText: "The Shawshank Redemption is a 1994 American drama film written and directed by Frank Darabont, based on the 1982 Stephen King novella Rita Hayworth and Shawshank Redemption. The film tells the story of banker Andy Dufresne (Tim Robbins), who is sentenced to life in Shawshank State Penitentiary for the murders of his wife and her lover, despite his claims of innocence. Over the following two decades, he befriends a fellow prisoner, contraband smuggler Ellis 'Red' Redding (Morgan Freeman), and becomes instrumental in a money laundering operation led by the prison warden Samuel Norton (Bob Gunton)."
+      },
+      {
+        image: "images/1995.png",
+        questionText: "17th Jan 1995",        
+        answers: ["Kobe Earthquake","Kobe"],
+        answerImage: "images/1995a.jpg",
+        answerText: "The Kobe earthquake, also known as the Great Hanshin Earthquake (Japanese: 阪神淡路大震災, Hepburn: Hanshin-Awaji daishinsai), occurred on January 17, 1995, at 05:46:53 JST in the southern part of Hyōgo Prefecture, Japan, including the region of Hanshin. It measured 6.9 on the moment magnitude scale and had a maximum intensity of 7 on the JMA Seismic Intensity Scale. The tremors lasted for approximately 20 seconds. The focus of the earthquake was located 17 km beneath its epicenter, on the northern end of Awaji Island, 20 km away from the center of the city of Kobe.At least 5,000 people died, about 4,600 of them from Kobe. Kobe, with its population of 1.5 million, was the closest major city to the epicenter and hit by the strongest tremors. It was Japan's second deadliest earthquake in the 20th century after the 1923 Great Kantō earthquake, in which more than 105,000 people died."
+      },
+      {
+        image: "images/1996.png",
+        questionText: "5th July 1996",        
+        answers: ["Dolly the sheep born","Dolly the Sheep"],
+        answerImage: "images/1996a.webp",
+        answerText: "Dolly (5 July 1996 – 14 February 2003) was a female Finn-Dorset sheep and the first mammal that was cloned from an adult somatic cell. She was cloned by associates of the Roslin Institute in Scotland, using the process of nuclear transfer from a cell taken from a mammary gland. Her cloning proved that a cloned organism could be produced from a mature cell from a specific body part. Contrary to popular belief, she was not the first animal to be cloned."
+      },
+      {
+        image: "images/1997.png",
+        questionText: "31st Aug 1997",        
+        answers: ["Princess Diana Death","Princess Diana","Princess Diana Crash"],
+        answerImage: "images/1997a.jpg",
+        answerText: "In the early hours of 31 August 1997, Diana, Princess of Wales died from injuries sustained in a car crash in the Pont de l'Alma tunnel in Paris, France. Dodi Fayed, Diana's partner, and the driver, Mercedes-Benz chauffeur Henri Paul, were both found dead inside the car. Diana's bodyguard, Trevor Rees-Jones, was the only survivor of the crash, albeit seriously injured. The subsequent investigation into the crash remained controversial for decades, with many challenging the official narrative of Diana's death."
+      },
+      {
+        image: "images/1998.png",
+        questionText: "4th Sep 1998",        
+        answers: ["Google Founded","Google Started","Google"],
+        answerImage: "images/1998a.jpg",
+        answerText: "Google was officially launched in 1998 by Larry Page and Sergey Brin to market Google Search, which has become the most used web-based search engine. Larry Page and Sergey Brin, students at Stanford University in California, developed a search algorithm first (1996) known as 'BackRub', with the help of Scott Hassan and Alan Steremberg."
+      },
+      {
+        image: "images/1999.png",
+        questionText: "All 1999 and before",        
+        answers: ["Y2K","Year 2000 Problem","Y2K Bug","Year 2000 Bug","Y2K Problem"],
+        answerImage: "images/1999a.jpg",
+        answerText: "The term year 2000 problem, or simply Y2K, refers to potential computer errors related to the formatting and storage of calendar data for dates in and after the year 2000. Many programs represented four-digit years with only the final two digits, e.g. 1985 as 85, making the year 2000 indistinguishable from 1900. Computer systems' inability to distinguish dates correctly had the potential to bring down worldwide infrastructures for computer-reliant industries."
+      },
+      {
+        image: "images/2000.png",
+        questionText: "25th July 2000",        
+        answers: ["Concorde Crash","Flight 4590","Concorde"],
+        answerImage: "images/2000a.webp",
+        answerText: "On 25 July 2000, Air France Flight 4590, a Concorde passenger jet on an Air France international charter flight from Paris to New York, crashed shortly after takeoff, killing all 109 people on board and 4 on the ground. It was the only fatal Concorde accident during its 27-year operational history."
+      },
+      {
+        image: "images/2001.png",
+        questionText: "19th Feb 2001",        
+        answers: ["Foot and Mouth outbreak","Foot and Mouth","Foot and Mouth disease"],
+        answerImage: "images/2001a.jpg",
+        answerText: "The outbreak of foot-and-mouth disease in the United Kingdom in 2001 caused a crisis in British agriculture and tourism. This epizootic saw 2,000 cases of the disease on farms across most of the British countryside. Over 6 million cows and sheep were slaughtered on farms in an eventually successful attempt to halt the disease. Cumbria was the worst affected area of the country, with 893 cases."
+      },
+      {
+        image: "images/2002.png",
+        questionText: "12th October 2002",        
+        answers: ["Bali","Bali Bombings"],
+        answerImage: "images/2002a.jpg",
+        answerText: "The 2002 Bali bombings were a series of terrorist attacks on 12 October 2002 in the tourist district of Kuta on the Indonesian island of Bali. The attacks killed 202 people—including 88 Australians and 38 local Indonesians—and injured a further 209, making it the worst terrorist act in Indonesia's history."
+      },
+      {
+        image: "images/2003.png",
+        questionText: "1st Feb 2003",        
+        answers: ["Columbia","Columbia Shuttle","Columbia Crash"],
+        answerImage: "images/2003a.png",
+        answerText: "On Saturday, February 1, 2003, Space Shuttle Columbia disintegrated as it re-entered the atmosphere over Texas and Louisiana, killing all seven astronauts on board. It was the second and last Space Shuttle mission to end in disaster, after the loss of Challenger and crew in 1986"
+      },
+      {
+        image: "images/2004.png",
+        questionText: "26th Dec 2004",        
+        answers: ["Indian Ocean earthquake and tsunami","tsunami"],
+        answerImage: "images/2004a.jpg",
+        answerText: "On 26 December 2004, at 07:58:53 local time (UTC+7), a Mw 9.2–9.3 earthquake struck with an epicenter off the west coast of Aceh in northern Sumatra, Indonesia. The undersea megathrust earthquake, known in the scientific community as the Sumatra–Andaman earthquake, was caused by a rupture along the fault between the Burma plate and the Indian plate, and reached a Mercalli intensity of IX in some areas. The earthquake caused a massive tsunami with waves up to 30 m (100 ft) high, known as the Boxing Day Tsunami after the Boxing Day holiday, or as the Asian Tsunami, which devastated communities along the surrounding coasts of the Indian Ocean, killing an estimated 227,898 people in 14 countries, especially in Aceh (Indonesia), Sri Lanka, Tamil Nadu (India), and Khao Lak (Thailand). The direct result was severe disruption to living conditions and commerce in coastal provinces of these and other surrounding countries. It is the deadliest tsunami in history, the deadliest natural disaster of the 21st century, and one of the deadliest natural disasters in recorded history.It is also the worst natural disaster in the history of Indonesia, the Maldives, Sri Lanka and Thailand."
+      },
+      {
+        image: "images/2005.png",
+        questionText: "Feb 14th 2005",        
+        answers: ["YouTube launched","YouTube","You Tube","You Tube launched"],
+        answerImage: "images/2005a.jpg",
+        answerText: "YouTube was founded by Chad Hurley, Jawed Karim, and Steve Chen. The three were early employees at PayPal and had become wealthy after eBay's acquisition of the company. Hurley had studied design at the Indiana University of Pennsylvania, and Chen and Karim studied computer science together at the University of Illinois Urbana-Champaign."
+      },
+      {
+        image: "images/2006.png",
+        questionText: "20th Sep 2006",        
+        answers: ["richard hammond crash","richard hammond"],
+        answerImage: "images/2006a.avif",
+        answerText: "On the 20th of September 2006, Richard Hammond was seriously injured in a car crash while filming for Top Gear at the former RAF Elvington airfield near York. He was driving a jet-powered car, the Vampire dragster, which was theoretically capable of travelling at speeds of up to 370mph (595.5 km/h), when one of the tyres unexpectedly failed on a structural level and caused the Vampire to lose control, before rolling over to its demise. Though unintentional, the Vampire's destruction meant it was one of 166 vehicles destroyed throughout the first 21 series of Top Gear. Despite the significance of the accident, it became something of an in-joke on the series in the years that followed."
+      },
+      {
+        image: "images/2007.png",
+        questionText: "29th June 2007",        
+        answers: ["iphone launch","iphone"],
+        answerImage: "images/2007a.jpg",
+        answerText: "Six out of ten Americans surveyed said they knew before its release that the iPhone was coming. The iPhone was released in the United States on June 29, 2007, at the price of $499 for the 4 GB model and $599 for the 8 GB model, both requiring a 2-year contract. Thousands of people were reported to have waited outside Apple and AT&T retail stores days before the device's launch; many stores reported stock shortages within an hour of availability."
+      },
+      {
+        image: "images/2008.png",
+        questionText: "27th Mar 2008",        
+        answers: ["Heathrow Terminal 5","Terminal 5","Heathrow Terminal 5 opened"],
+        answerImage: "images/2008a.jpg",
+        answerText: "Heathrow Terminal 5 is an airport terminal at Heathrow Airport, the main airport serving London. Opened in 2008, the main building in the complex is the largest free-standing structure in the United Kingdom. Until 2012, the terminal was used solely by British Airways. It now is used as one of the three global hubs of IAG, served by British Airways and Iberia."
+      },
+      {
+        image: "images/2009.png",
+        questionText: "20th Jan 2009",        
+        answers: ["Barack Obama","Barack Obama inauguration"],
+        answerImage: "images/2009a.webp",
+        answerText: "Barack Obama's tenure as the 44th president of the United States began with his first inauguration on January 20, 2009, and ended on January 20, 2017. Obama, a Democrat from Illinois, took office after defeating the Republican nominee John McCain in the 2008 presidential election."
+      }, 
+      {
+        image: "images/2010.png",
+        questionText: "20th Apr 2010",        
+        answers: ["Deepwater Horizon","Deep Water Horizon","DeepWater Horizon oil spill"],
+        answerImage: "images/2010a.jpg",
+        answerText: "Deepwater Horizon was an ultra-deepwater, dynamically positioned, semi-submersible offshore drilling rig owned by Transocean and operated by the BP company. On 20 April 2010, while drilling in the Gulf of Mexico at the Macondo Prospect, a blowout caused an explosion on the rig that killed 11 crewmen and ignited a fireball visible from 40 miles (64 km) away. The fire was inextinguishable and, two days later, on 22 April, the Horizon collapsed, leaving the well gushing at the seabed and becoming the largest marine oil spill in history."
+      },
+      {
+        image: "images/2011.png",
+        questionText: "17th Apr 2011",        
+        answers: ["Game of Thrones","Game of Thrones launches"],
+        answerImage: "images/2011a.jpg",
+        answerText: "Game of Thrones is an American fantasy drama television series created by David Benioff and D. B. Weiss for HBO. It is an adaptation of A Song of Ice and Fire, a series of high fantasy novels by George R. R. Martin, the first of which is A Game of Thrones. The show premiered on HBO in the United States on April 17, 2011, and concluded on May 19, 2019, with 73 episodes broadcast over eight seasons."
+      },
+      {
+        image: "images/2012.png",
+        questionText: "13th Jan 2012",        
+        answers: ["Costa Concordia"],
+        answerImage: "images/2012a.jpg",
+        answerText: "On 13 January 2012 at 21:45, Costa Concordia struck a rock in the Tyrrhenian Sea just off the eastern shore of Isola del Giglio. This tore open a 53 m (174 ft) gash on the port side of her hull, which soon flooded parts of the engine room, cutting off power from the engines and ship services. As water flooded in, the ship listed as she drifted back towards the island and grounded near shore, then rolled onto her starboard side, lying in an unsteady position on a rocky underwater ledge.The evacuation of Costa Concordia took over six hours, and of the 3,229 passengers and 1,023 crew known to have been aboard, 32 died. Francesco Schettino, the ship's captain at that time, was tried and found guilty of manslaughter, causing a maritime accident, and abandoning his ship. He was sentenced to sixteen years in prison in 2015. The wreck was salvaged three years after the incident and then towed to the port of Genoa, where she was scrapped."
+      },
+      {
+        image: "images/2013.png",
+        questionText: "",        
+        answers: ["Edward Snowden","Edward Snowden Charged"],
+        answerImage: "images/2013a.jpg",
+        answerText: "Edward Joseph Snowden is a former National Security Agency (NSA) intelligence contractor and whistleblower who leaked classified documents revealing the existence of global surveillance programs. In 2006 he started working for the Central Intelligence Agency (CIA) and then switched to Dell in 2009, where he managed computer systems for the NSA. In 2013, he worked for two months at Booz Allen Hamilton with the purpose of gathering more NSA documents.In May 2013, Snowden flew to Hong Kong, and in early June he revealed thousands of classified NSA documents to journalists Glenn Greenwald, Laura Poitras, Barton Gellman, and Ewen MacAskill. His disclosures revealed numerous global surveillance programs, many run by the NSA and the Five Eyes intelligence alliance with the cooperation of telecommunications companies and European governments, and prompted a cultural discussion about national security and individual privacy. On June 21, 2013, the United States Department of Justice unsealed charges against Snowden on two counts of violating the Espionage Act of 1917 and theft of government property, following which the Department of State revoked his passport.He stayed in Moscow's Sheremetyevo International Airport for a month, then was granted asylum in the country. He became naturalized as a citizen of Russia in 2022."
+      },
+      {
+        image: "images/2014.png",
+        questionText: "2013-2016",        
+        answers: ["ebola","ebola epidemic"],
+        answerImage: "images/2014a.jpg",
+        answerText: "The 2013–2016 epidemic of Ebola virus disease, centered in West Africa, was the most widespread outbreak of the disease in history. It caused major loss of life and socioeconomic disruption in the region, mainly in Guinea, Liberia and Sierra Leone. The first cases were recorded in Guinea in December 2013; the disease spread to neighbouring Liberia and Sierra Leone, with minor outbreaks occurring in Nigeria and Mali.[13][14] Secondary infections of medical workers occurred in the United States and Spain.[15][16] Isolated cases were recorded in Senegal,[17] the United Kingdom and Italy. The number of cases peaked in October 2014 and then began to decline gradually, following the commitment of substantial international resources."
+      },
+      {
+        image: "images/2015.png",
+        questionText: "13th Nov 2015",        
+        answers: ["Bataclan","Bataclan Massacre","Bataclan Theatre","Bataclan Theatre Massacre"],
+        answerImage: "images/2015a.webp",
+        answerText: "A series of coordinated Islamist terrorist attacks took place on Friday, 13 November 2015 in Paris, France, and the city's northern suburb, Saint-Denis. Beginning at 21:16, three suicide bombers struck outside the Stade de France in Saint-Denis, during an international football match, after failing to gain entry to the stadium. Another group of attackers then fired on crowded cafés and restaurants in Paris, with one of them also detonating an explosive, killing himself in the process. A third group carried out another mass shooting and took hostages at an Eagles of Death Metal concert attended by 1,500 people in the Bataclan theatre, leading to a stand-off with police. The attackers were either shot or detonated suicide vests when police raided the theatre. The attackers killed 130 people, including 90 at the Bataclan theatre. Another 416 people were injured, almost 100 critically. Seven of the attackers were also killed."
+      },
+      {
+        image: "images/2016.png",
+        questionText: "23rd June 2016",        
+        answers: ["Brexit","Brexit Vote"],
+        answerImage: "images/2016a.avif",
+        answerText: "he 2016 United Kingdom European Union membership referendum, commonly referred to as the EU referendum or the Brexit referendum, was a referendum that took place on 23 June 2016 in the United Kingdom (UK) and Gibraltar under the provisions of the European Union Referendum Act 2015 to ask the electorate whether the country should continue to remain a member of, or leave, the European Union (EU). The result was a vote in favour of leaving the EU, triggering calls to begin the process of the country's withdrawal from the EU commonly termed 'Brexit'."
+      },
+      {
+        image: "images/2017.png",
+        questionText: "14th June 2017",        
+        answers: ["Grenfell","Grenfell Tower","Grenfell Tower Fire","Grenfell Fire"],
+        answerImage: "images/2017a.jpg",
+        answerText: "On 14 June 2017, a high-rise fire broke out in the 24-storey Grenfell Tower block of flats in North Kensington, West London, England, at 00:54 BST and burned for 60 hours. Seventy people died at the scene and two people died later in hospital, with more than 70 injured and 223 escaping. It was the deadliest structural fire in the United Kingdom since the 1988 Piper Alpha oil-platform disaster and the worst UK residential fire since the Blitz of World War II."
+      },
+      {
+        image: "images/2018.png",
+        questionText: "4th Mar 2018",        
+        answers: ["Novichok","Novichok Poisioning","Salisbury Poisioning"],
+        answerImage: "images/2018a.avif",
+        answerText: "The poisoning of Sergei and Yulia Skripal, also known as the Salisbury poisoning, was a failed assassination attempt to poison Sergei Skripal, a former Russian military officer and double agent for the British intelligence agencies in the city of Salisbury, England on 4 March 2018. Sergei and his daughter, Yulia Skripal, were poisoned by means of a Novichok nerve agent. Both spent several weeks in hospital in a critical condition, before being discharged. A police officer, Nick Bailey, was also taken into intensive care after attending the incident, and was later discharged."
+      },
+      {
+        image: "images/2019.png",
+        questionText: "15th Apr 2019",        
+        answers: ["Notre Dame","Notre Dame Fire"],
+        answerImage: "images/2019a.jpg",
+        answerText: "On 15 April 2019, at 18:18 CEST, a structural fire broke out in the roof space of Notre-Dame de Paris, a medieval Catholic cathedral in Paris, France, that is part of the 'Paris, Banks of the Seine' UNESCO World Heritage Site. The fire, which investigators believe was started by a cigarette or an electrical short circuit, destroyed the cathedral's wooden spire (flèche) and most of the wooden roof and severely damaged the cathedral's upper walls. The vaulted stone ceiling largely contained the burning roof as it collapsed, preventing extensive damage to the interior. Many works of art and religious relics were moved to safety, but others suffered smoke damage, and some of the exterior art was damaged or destroyed. The cathedral's altar, two pipe organs, and three 13th-century rose windows suffered little or no damage. Three emergency workers were injured. The fire contaminated the site and nearby areas of Paris with toxic dust and lead."
+      },
+      {
+        image: "images/2020.png",
+        questionText: "4th Aug 2020",        
+        answers: ["Beirut","Beirut Explosion"],
+        answerImage: "images/2020a.avif",
+        answerText: "On 4 August 2020, a major explosion occurred in Beirut, Lebanon, triggered by the ignition of 2,750 tonnes of ammonium nitrate. The chemical, confiscated in 2014 from the cargo ship MV Rhosus and stored at the Port of Beirut without adequate safety measures for six years, detonated after a fire broke out in a nearby warehouse. The explosion resulted in at least 218 fatalities, 7,000 injuries, and approximately 300,000 displaced individuals, alongside property damage estimated at US$15 billion. The blast released energy comparable to 1.1 kilotons of TNT, ranking it among the most powerful non-nuclear explosions ever recorded and the largest single detonation of ammonium nitrate."
+      },
+      {
+        image: "images/2021.png",
+        questionText: "10th Dec 2021",        
+        answers: ["Jackie Weaver","Jackie Weaver Handforth Parish Council"],
+        answerImage: "images/2021a.webp",
+        answerText: "In a Zoom meeting of the Handforth Parish Council Planning and Environment Committee on 10 December 2020, two camps formed over a bureaucratic dispute. Jackie Weaver, chief officer of the Cheshire Association of Local Councils (ChALC), was brought into the meeting to moderate and provide guidance on the running of the council. She is recorded as clerk to the meeting in the official minutes, but is not the official clerk of Handforth Parish Council. For this reason, council chairman Brian Tolver refused to accept the legality or legitimacy of the meeting, called by two other councillors, as no proper officer was present, saying that she had 'no authority here', sentiments echoed by vice chair Aled Brewerton. (Weaver said there was no need for a proper officer to be involved while she was acting as clerk.) This led to Tolver being moved from the meeting into a virtual waiting room. In response to Weaver initiating a vote for a proxy chair in Tolver's absence, Brewerton angrily insisted that he should assume control as vice chair. Brewerton was consequently removed from the conference by Weaver, along with councillor Barry Burkhill, who had protested the expulsion of Tolver and Brewerton. Councillor John Smith was nominated as proxy chair, and allowed a vote to confirm the removals."
+      },
+      {
+        image: "images/2022.png",
+        questionText: "6th Sep 2022 - 25th October 2022",        
+        answers: ["Liz Truss","Liz Truss shortest-serving Prime Minister","shortest serving prime minister"],
+        answerImage: "images/2022a.png",
+        answerText: "Liz Truss was the shortest-serving British prime minister, holding the position for 49 days in 2022. She resigned after her economic policies, which included large unfunded tax cuts, triggered a government crisis. This surpassed the previous record held by George Canning, who served for 119 days in 1827. "
+      },
+      {
+        image: "images/2023.png",
+        questionText: "18th Jun 2023",        
+        answers: ["titan sub","titan submarine","titan submarine implosion"],
+        answerImage: "images/2023a.jpg",
+        answerText: "On 18 June 2023, Titan, a submersible operated by the American tourism and expeditions company OceanGate, imploded during an expedition to view the wreck of the Titanic in the North Atlantic Ocean off the coast of Newfoundland, Canada. Aboard the submersible were Stockton Rush, the American chief executive officer of OceanGate; Paul-Henri Nargeolet, a French deep-sea explorer and Titanic expert; Hamish Harding, a British businessman; Shahzada Dawood, a Pakistani-British businessman; and Dawood's son, Suleman."
+      },
+      {
+        image: "images/2024.png",
+        questionText: "17th Mar 2023 - 8th Dec 2024",        
+        answers: ["Taylor Swift","Taylor Swift Eras Tour","Taylor Swift Eras"],
+        answerImage: "images/2024a.png",
+        answerText: "The Eras Tour was the sixth concert tour by the American singer-songwriter Taylor Swift. It began in Glendale, Arizona, United States, on March 17, 2023, and concluded in Vancouver, British Columbia, Canada, on December 8, 2024. Spanning 149 shows in 51 cities across five continents, the Eras Tour had a large cultural and socioeconomic impact. It became the highest-grossing tour of all time and the first to earn over $1 billion and $2 billion in revenue."
+      },
+      {
+        image: "images/2025.png",
+        questionText: "3rd Jan 2025",        
+        answers: [""],
+        answerImage: "images/2025a.jpg",
+        answerText: "Luke Littler defeated three-time world champion Michael van Gerwen 7-3 in sets. Nicknamed 'the Nuke', he is the youngest world champion in darts history, having won the 2025 World Championship at 17 years and 347 days old. He is also the reigning two-time back-to-back Grand Slam champion and the reigning UK Open, World Matchplay, World Grand Prix and Players champion."
+      }                                                        
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    // Fuzzy matching (Levenshtein distance)
+    function levenshtein(a, b) {
+      const matrix = Array.from({ length: a.length + 1 }, () => []);
+      for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+      for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + cost
+          );
+        }
+      }
+      return matrix[a.length][b.length];
+    }
+
+    function isCloseEnough(userAnswer, correctAnswer) {
+      const distance = levenshtein(userAnswer, correctAnswer);
+      return distance <= 2; // allow up to 2 typos
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion + 1) / quiz.length) * 100;
+      document.getElementById("progress-bar").style.width = progress + "%";
+    }
+
+    function loadQuestion() {
+      const q = quiz[currentQuestion];
+      document.getElementById("question-image").src = q.image;
+      document.getElementById("question-text").textContent = q.questionText;
+      document.getElementById("answer-input").value = "";
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("answer-image").style.display = "none";
+      document.getElementById("answer-text").textContent = "";
+      document.getElementById("question-number").textContent =
+        `Question ${currentQuestion + 1} of ${quiz.length}`;
+      document.getElementById("next-button").style.display = "none";
+      document.getElementById("next-button").textContent = "Next Question";
+      document.getElementById("submit-button").disabled = false;
+      updateProgress();
+    }
+
+function submitAnswer() {
+  const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
+  const acceptableAnswers = quiz[currentQuestion].answers.map(a => a.toLowerCase());
+
+  // Check if any acceptable answer matches closely
+  const isCorrect = acceptableAnswers.some(ans => isCloseEnough(userAnswer, ans));
+
+  if (isCorrect) {
+    score++;
+    document.getElementById("feedback").textContent = "✅ Correct!";
+  } else {
+    document.getElementById("feedback").textContent =
+      `❌ Incorrect. Acceptable answers were: ${acceptableAnswers.join(", ")}.`;
+  }
+
+  document.getElementById("score").textContent = `Score: ${score}`;
+
+  const answerImg = document.getElementById("answer-image");
+  answerImg.src = quiz[currentQuestion].answerImage;
+  answerImg.style.display = "block";
+  document.getElementById("answer-text").textContent = quiz[currentQuestion].answerText;
+
+  document.getElementById("submit-button").disabled = true;
+
+  if (currentQuestion === quiz.length - 1) {
+    document.getElementById("next-button").textContent = "Get Final Scores";
+  }
+
+  document.getElementById("next-button").style.display = "inline-block";
+}
+
+
+    function nextQuestion() {
+      if (currentQuestion < quiz.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        // Final results
+        document.getElementById("quiz-container").innerHTML =
+          `<h2>Quiz Complete!</h2><p>Your final score is ${score} out of ${quiz.length}.</p>`;
+      }
+    }
+
+    window.onload = loadQuestion;
+  </script>
+</body>
+</html>
