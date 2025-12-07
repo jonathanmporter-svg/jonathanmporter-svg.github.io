@@ -1,5 +1,10 @@
 <style>
-.qr-code {
+.qr-section {
+  page-break-after: always;   /* ensures each QR code starts on a new page when printing */
+  margin: 40px auto;
+  text-align: center;
+}
+  .qr-code {
   display: block;          /* ensures it behaves like a block element */
   margin: 20px auto;       /* centers horizontally with some spacing */
   max-width: 80%;          /* scales down to fit smaller screens */
@@ -14,12 +19,13 @@
 } 
 </style>
 
-<h1>Graham's 60th Quiz</h1>
-<img src="gquiz.png" class="qr-code"/>
+<div class="qr-section">
+  <h1>Graham's 60th Quiz</h1>
+  <img src="gquiz.png" class="qr-code"/>
+</div>
 
+<div class="qr-section">
+  <h1>Those that Left us in 2025</h1>
+  <img src="2025.png" class="qr-code"/>
+</div>
 
-
-
-
-<h1>Those that Left us in 2025</h1>
-<img src="2025.png" class="qr-code"/>
