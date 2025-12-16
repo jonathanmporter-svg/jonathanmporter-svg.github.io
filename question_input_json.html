@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JSON Array Builder</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, textarea { width: 100%; padding: 5px; margin-top: 5px; }
+    textarea { height: 100px; resize: vertical; white-space: pre-wrap; }
+    button { margin-top: 15px; padding: 10px 15px; margin-right: 10px; cursor: pointer; }
+    #clearBtn { background-color: #e74c3c; color: white; border: none; }
+    #addBtn { background-color: #2ecc71; color: white; border: none; }
+    pre { background: #f4f4f4; padding: 10px; margin-top: 20px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Create JSON Array Entries</h1>
+  
+  <form id="jsonForm">
+    <label>Image File:
+      <input type="file" id="image" accept="image/*">
+    </label>
+    
+    <label>Question Text:
+      <input type="text" id="questionText" placeholder="He got around">
+    </label>
+    
+    <label>Answers (comma separated):
+      <input type="text" id="answers" placeholder="Brian Wilson,ABC">
+    </label>
+    
+    <label>Answer Image File:
+      <input type="file" id="answerImage" accept="image/*">
+    </label>
+    
+    <label>Answer Text:
+      <textarea id="answerText" placeholder="XYZ"></textarea>
+    </label>
+    
+    <button type="button" id="addBtn" onclick="appendJSON()">Add Entry</button>
+    <button type="button" id="clearBtn" onclick="clearJSON()">Clear Output JSON</button>
+  </form>
+  
+  <h2>Output JSON</h2>
+  <pre id="output">[]</pre>
+  
+  <script>
+    let jsonArray = [];
+
+    function appendJSON() {
+      const imageInput = document.getElementById('image');
+      const answerImageInput = document.getElementById('answerImage');
+
+      const imageFile = imageInput.files[0] ? imageInput.files[0].name : "";
+      const answerImageFile = answerImageInput.files[0] ? answerImageInput.files[0].name : "";
+
+      const image = imageFile ? "images/" + imageFile : "";
+      const questionText = document.getElementById('questionText').value.trim();
+      const answers = document.getElementById('answers').value.split(',').map(a => a.trim()).filter(a => a);
+      const answerImage = answerImageFile ? "images/" + answerImageFile : "";
+      const answerText = document.getElementById('answerText').value.trim();
+      
+      const obj = {
+        image: image,
+        questionText: questionText,
+        answers: answers,
+        answerImage: answerImage,
+        answerText: answerText
+      };
+      
+      jsonArray.push(obj);
+      document.getElementById('output').textContent = formatWithoutQuotes(jsonArray);
+      
+      document.getElementById('jsonForm').reset();
+    }
+
+    function clearJSON() {
+      jsonArray = [];
+      document.getElementById('output').textContent = formatWithoutQuotes(jsonArray);
+    }
+
+    // Custom formatter to remove quotes from property names
+    function formatWithoutQuotes(arr) {
+      return JSON.stringify(arr, null, 2)
+        .replace(/"(\w+)":/g, '$1:'); // strip quotes from keys
+    }
+  </script>
+</body>
+</html>
