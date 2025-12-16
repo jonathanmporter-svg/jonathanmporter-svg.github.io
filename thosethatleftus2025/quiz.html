@@ -526,39 +526,40 @@
       hintUsed = true;
     }
 
-    function submitAnswer() {
-      const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
-      const acceptableAnswers = quiz[currentQuestion].answers.map(a => a.toLowerCase());
+function submitAnswer() {
+  const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
+  const acceptableAnswers = quiz[currentQuestion].answers.map(a => a.toLowerCase());
 
-      const isCorrect = acceptableAnswers.some(ans => isCloseEnough(userAnswer, ans));
+  const isCorrect = acceptableAnswers.some(ans => isCloseEnough(userAnswer, ans));
 
-      if (isCorrect) {
-        score += hintUsed ? 1 : 2; // 1 point if hint used, 2 if not
-        document.getElementById("feedback").textContent = "✅ Correct!";
-      } else {
-        document.getElementById("feedback").textContent =
-          `❌ Incorrect. Acceptable answers were: ${acceptableAnswers.join(", ")}.`;
-      }
+  if (isCorrect) {
+    score += hintUsed ? 1 : 2;
+    document.getElementById("feedback").textContent = "✅ Correct!";
+  } else {
+    document.getElementById("feedback").textContent =
+      `❌ Incorrect. Acceptable answers were: ${acceptableAnswers.join(", ")}.`;
+  }
 
-      document.getElementById("score").textContent = `Score: ${score}`;
+  document.getElementById("score").textContent = `Score: ${score}`;
 
-      // Show answer image and text
-      const answerImg = document.getElementById("answer-image");
-      answerImg.src = quiz[currentQuestion].answerImage;
-      answerImg.style.display = "block";
-      document.getElementById("answer-text").textContent = quiz[currentQuestion].answerText;
+  // Handle answer image loading safely
+  const answerImg = document.getElementById("answer-image");
+  answerImg.style.display = "none"; // hide until loaded
+  answerImg.onload = () => {
+    answerImg.style.display = "block"; // show only after new image is ready
+  };
+  answerImg.src = quiz[currentQuestion].answerImage;
 
-      // Prevent double submissions
-      document.getElementById("submit-button").disabled = true;
+  document.getElementById("answer-text").textContent = quiz[currentQuestion].answerText;
 
-      // Last question -> change button label
-      if (currentQuestion === quiz.length - 1) {
-        document.getElementById("next-button").textContent = "Get Final Scores";
-      }
+  document.getElementById("submit-button").disabled = true;
 
-      // Reveal Next/Get Final Scores button
-      document.getElementById("next-button").style.display = "inline-block";
-    }
+  if (currentQuestion === quiz.length - 1) {
+    document.getElementById("next-button").textContent = "Get Final Scores";
+  }
+  document.getElementById("next-button").style.display = "inline-block";
+}
+
 
     function nextQuestion() {
       if (currentQuestion < quiz.length - 1) {
