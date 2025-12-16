@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Image Quiz</title>
+  <title>Those that left us in 2025</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,18 +17,13 @@
       border-radius: 8px;
       padding: 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 600px;
+      max-width: 640px;
       margin: auto;
     }
     h1 { font-size: 1.6em; margin: 0 0 10px; }
+    h2 { font-size: 1.0em; margin: 0 0 10px; }
     #question-number { font-size: 1.1em; margin-bottom: 8px; font-weight: bold; }
 
-    #answer-image {
-      display: block;
-      margin: 12px auto; /* centers horizontally */
-    }
-
-    
     /* Progress bar */
     #progress-container {
       width: 100%;
@@ -45,12 +40,15 @@
       transition: width 0.4s ease;
     }
 
+    /* Images */
     img {
       max-width: 100%;
       height: auto;
-      margin: 12px 0;
+      margin: 12px auto;
       border-radius: 6px;
+      display: block;
     }
+    #answer-image { margin: 12px auto; }
 
     .controls {
       display: flex;
@@ -81,9 +79,21 @@
     button:hover { background: #005fa3; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
 
+    #question-text {
+      margin-top: 8px;
+      font-size: 1.05em;
+      font-style: italic;
+      display: none; /* hidden until Hint is pressed */
+    }
     #feedback { margin-top: 12px; font-size: 1.05em; min-height: 1.4em; }
+    #answer-text {
+      margin-top: 8px;
+      font-size: 1.1em;
+      font-weight: bold;
+      text-align: center;
+      white-space: pre-line; /* supports \n in answer text */
+    }
     #score { font-size: 1.1em; margin-top: 14px; font-weight: bold; }
-    #answer-text { margin-top: 8px; font-size: 1.1em; font-weight: bold; }
 
     @media (max-width: 480px) {
       h1 { font-size: 1.4em; }
@@ -93,212 +103,383 @@
 </head>
 <body>
   <h1>Those that left us in 2025</h1>
+  <h2>2 points if you don't use a hint 1 if you do</h2>
   <div id="quiz-container">
     <div id="question-number"></div>
     <div id="progress-container"><div id="progress-bar"></div></div>
 
-    <img id="question-image" src="" alt="Quiz Image" />
+    <!-- Question: image + hidden text (hint) -->
+    <img id="question-image" src="" alt="Question image" />
+    <div id="question-text"></div>
 
+    <!-- Controls -->
     <div class="controls">
       <input type="text" id="answer-input" placeholder="Type your answer here" />
+      <button id="hint-button" type="button" onclick="showHint()">Hint</button>
       <button id="submit-button" type="button" onclick="submitAnswer()">Submit</button>
       <button id="next-button" type="button" onclick="nextQuestion()" style="display:none;">Next Question</button>
     </div>
 
+    <!-- Feedback + Answer: image + text -->
     <div id="feedback"></div>
-    <img id="answer-image" src="" alt="Answer Image" style="display:none;" />
+    <img id="answer-image" src="" alt="Answer image" style="display:none;" />
     <div id="answer-text"></div>
+
     <div id="score">Score: 0</div>
   </div>
 
   <script>
     const quiz = [
       {
-        image: "images/prunellascales.jpg",
-        answer: "Prunella Scales",
-        answerImage: "images/prunellascalesa.jpg"
-      },
-      {
-        image: "images/ozzyosborne.jpg",
-        answer: "Ozzy Osborne",
-        answerImage: "images/ozzyosbornea.jpg"
-      },
-      {
-        image: "images/jillycooper.jpg",
-        answer: "Jilly Cooper",
-        answerImage: "images/jillycoopera.jpg"
-      },
-      {
-        image: "images/patriciaroutledge.jpg",
-        answer: "Patricia Routledge",
-        answerImage: "images/patriciaroutledgea.avif"
+        image: "images/brianwilson.png",
+        questionText: "He got around",
+        answers: ["Brian Wilson"],   
+        answerImage: "images/brianwilsona.webp",
+        answerText: "Brian Douglas Wilson (June 20, 1942 – June 11, 2025) was an American musician, singer, songwriter and record producer who co-founded the Beach Boys and received widespread recognition as one of the most innovative and significant musical figures of his era. His work was distinguished for its high production values, complex harmonies and orchestrations, vocal layering, and introspective or ingenuous themes. He was also known for his versatile head voice and falsetto."
       },
       {
         image: "images/dianekeaton.png",
-        answer: "Diane Keaton",
-        answerImage: "images/dianekeatona.avif"
-      },
-      {
-        image: "images/dickiebird.png",
-        answer: "Dickie Bird",
-        answerImage: "images/dickiebirda.webp"
-      },
-      {
-        image: "images/rickyhatton.png",
-        answer: "Ricky Hatton",
-        answerImage: "images/rickyhattona.jpg"
-      },
-      {
-        image: "images/joannatrollope.png",
-        answer: "Joanna Trollope",
-        answerImage: "images/joannatrollopea.avif"
-      },      
-      {
-        image: "images/cleolane.png",
-        answer: "Cleo Lane",
-        answerImage: "images/cleolanea.webp"
-      },
-      {
-        image: "images/tomstoppard.png",
-        answer: "Tom Stoppard",
-        answerImage: "images/tomstopparda.jpg"
-      },
-      {
-        image: "images/normantebbit.png",
-        answer: "Norman Tebbit",
-        answerImage: "images/normantebbita.jpg"
-      },
-      {
-        image: "images/sandygall.png",
-        answer: "Sandy Gall",
-        answerImage: "images/sandygalla.jpeg"
-      },
-      {
-        image: "images/thevivienne.png",
-        answer: "The Vivienne",
-        answerImage: "images/theviviennea.webp"
-      },
-      {
-        image: "images/robertredford.png",
-        answer: "Robert Redford",
-        answerImage: "images/robertredforda.jpg"
-      },
-      {
-        image: "images/quentinwilson.png",
-        answer: "Quentin Wilson",
-        answerImage: "images/quentinwilsona.jpg"
-      },
-      {
-        image: "images/charliekirk.png",
-        answer: "Charlie Kirk",
-        answerImage: "images/charliekirka.avif"
-      },
-      {
-        image: "images/frederickforsyth.png",
-        answer: "Frederick Forsyth",
-        answerImage: "images/frederickforsytha.webp"
-      },
-      {
-        image: "images/duchessofkent.png",
-        answer: "Duchess of Kent",
-        answerImage: "images/duchessofkenta.webp"
-      },
-      {
-        image: "images/kimwoodburn.png",
-        answer: "Kim Woodburn",
-        answerImage: "images/kimwoodburna.jpg"
-      },
-      {
-        image: "images/henrykelly.png",
-        answer: "Henry Kelly",
-        answerImage: "images/henrykellya.avif"
-      },
-      {
-        image: "images/stanleybaxter.png",
-        answer: "Stanley Baxter",
-        answerImage: "images/stanleybaxtera.avif"
-      },      
-      {
-        image: "images/giorgioarmani.png",
-        answer: "Giorgio Armani",
-        answerImage: "images/giorgioarmania.jpg"
-      },
-      {
-        image: "images/valkilmer.png",
-        answer: "Val Kilmer",
-        answerImage: "images/valkilmera.jpg"
-      },
-      {
-        image: "images/slystone.png",
-        answer: "Sly Stone",
-        answerImage: "images/slystonea.webp"
-      },
-      {
-        image: "images/brianwilson.png",
-        answer: "Brian Wilson",
-        answerImage: "images/brianwilsona.webp"
-      },
-      {
-        image: "images/janegoodall.png",
-        answer: "Jane Goodall",
-        answerImage: "images/janegoodalla.avif"
-      },
-      {
-        image: "images/hulkhogan.png",
-        answer: "Hulk Hogan",
-        answerImage: "images/hulkhogana.avif"
-      },
-      {
-        image: "images/terencestamp.png",
-        answer: "Terence Stamp",
-        answerImage: "images/terencestampa.avif"
-      },
-      {
-        image: "images/dickcheney.png",
-        answer: "Dick Cheney",
-        answerImage: "images/dickcheneya.jpg"
-      },
-      {
-        image: "images/denislaw.png",
-        answer: "Denis Law",
-        answerImage: "images/denislawa.jpg"
-      },
-      {
-        image: "images/mariannefaithfull.png",
-        answer: "Marianne Faithfull",
-        answerImage: "images/mariannefaithfulla.jpg"
-      },
-      {
-        image: "images/agakhaniv.png",
-        answer: "Aga Khan IV",
-        answerImage: "images/agakhaniva.jpg"
-      },
-      {
-        image: "images/jackvettriano.png",
-        answer: "Jack Vettriano",
-        answerImage: "images/jackvettrianoa.jpg"
-      },
-      {
-        image: "images/joanplowright.png",
-        answer: "Joan Plowright",
-        answerImage: "images/joanplowrighta.jpg"
+        questionText: "Appeared in the Godfather Trilogy",
+        answers: ["Diane Keaton"],   
+        answerImage: "images/dianekeatona.avif",
+        answerText: "Diane Keaton Hall (January 5, 1946 – October 11, 2025) was an American actress. Her career spanned more than five decades, during which she rose to prominence in the New Hollywood movement. She collaborated frequently with Woody Allen, appearing in eight of his films. Keaton's accolades include an Academy Award, a BAFTA Award, and two Golden Globe Awards, along with nominations for two Emmy Awards and a Tony Award. She was honored with the Film at Lincoln Center Gala Tribute in 2007 and the AFI Life Achievement Award in 2017."
       },
       {
         image: "images/genehackman.png",
-        answer: "Gene Hackman",
-        answerImage: "images/genehackmana.jpg"
-      }
+        questionText: "Appeared in the French Connection",
+        answers: ["Gene Hackman","Jean Hackman"],
+        answerImage: "images/genehackmana.jpg",
+        answerText: "Eugene Allen Hackman (January 30, 1930 – c. February 18, 2025) was an American actor. Considered one of the greatest actors of his generation and a paragon of the New Hollywood movement, Hackman's mainstream acting career spanned over four decades. He received several accolades, including two Academy Awards, two British Academy Film Awards, one Silver Bear and four Golden Globe Awards."
+      },
+      {
+        image: "images/cleolane.png",
+        questionText: "She had a five octave range",        
+        answers: ["Cleo Lane","Clio Lane"],
+        answerImage: "images/cleolanea.webp",
+        answerText: "Dame Cleo Laine, Lady Dankworth (born Clementine Dinah Bullock; 28 October 1927 – 24 July 2025) was an English singer and actress known for her scat singing.[1] She was the wife of jazz composer and musician Sir John Dankworth and the mother of bassist Alec and singer Jacqui Dankworth. Laine had popular success with singles such as 'You'll Answer To Me' and appeared in a range of musical theatre productions. She received a number of awards and honours including appointment as an OBE in 1979, and a Grammy in 1986; she became a dame in 1997."
+      },
+      {
+        image: "images/henrykelly.png",
+        questionText: "What am I?",
+        answers: ["Henry Kelly"],
+        answerImage: "images/henrykellya.avif",
+        answerText: "Patrick Henry Kelly (17 April 1946 – 25 February 2025), better known as Henry Kelly, was an Irish radio and television broadcaster and journalist who was based in the United Kingdom."
+      },
+      {
+        image: "images/janegoodall.png",
+        questionText: "Monkey Business",        
+        answers: ["Jane Goodall"],
+        answerImage: "images/janegoodalla.avif",
+        answerText: "Dame Valerie Jane Morris Goodall  née Morris-Goodall; (3 April 1934 – 1 October 2025) was an English primatologist and anthropologist. Regarded as a pioneer in primate ethology, and described by many publications as 'the world's preeminent chimpanzee expert', she was best known for more than six decades of field research on the social and family life of wild chimpanzees in the Kasakela chimpanzee community at Gombe Stream National Park in Tanzania. Beginning in 1960, under the mentorship of the palaeontologist Louis Leakey, Goodall's research demonstrated that chimpanzees share many key traits with humans, such as using tools, having complex emotions, forming lasting social bonds, engaging in organised warfare, and passing on knowledge across generations, which redefined the traditional view that humans are uniquely different from other animals."
+      },
+      {
+        image: "images/denislaw.png",
+        questionText: "He scored 237 goals in 404 appearances at Manchester United",        
+        answers: ["Denis Law","Dennis Law"],
+        answerImage: "images/denislawa.jpg",
+        answerText: "Denis Law (24 February 1940 – 17 January 2025) was a Scottish footballer who played as a forward. His career as a football player began at Second Division Huddersfield Town in 1956. After four years at Huddersfield, he was signed by Manchester City for an estimated transfer fee of £55,000, which set a new British record. Law spent one year there before Torino bought him for £110,000, this time setting a new record fee for a transfer involving a British player. Although he played well in Italy, he found it difficult to settle there and signed for Manchester United in 1962, setting another British record transfer fee of £115,000."
+      },
+      {
+        image: "images/giorgioarmani.png",
+        questionText: "His products featured heavily in Miami Vice",        
+        answers: ["Giorgio Armani","Georgio Armani"],
+        answerImage: "images/giorgioarmania.jpg",
+        answerText: "Giorgio Armani (11 July 1934 – 4 September 2025) was an Italian fashion designer and founder of the Armani luxury fashion house. Widely regarded as among the most influential designers in contemporary fashion, Armani initially gained recognition for his work with fashion house Cerruti 1881, before founding his own label in 1975. He became known for minimalist, deconstructed silhouettes—especially his jackets and suits—which are said to have redefined masculine and feminine elegance in a contemporary form. Armani also played a pivotal role in shaping celebrity style, particularly red-carpet fashion. By the early 2000s, he was recognized as the most successful Italian designer, with his brand expanding into music, sport, and luxury hotels."
+      },
+  {
+    image: "images/agakhaniv.png",
+    questionText: "Skied for Iran in 1964 Olympics",
+    answers: [
+      "Aga Khan IV",
+      "Aga Khan 4",
+      "Aga Khan 4th"
+    ],
+    answerImage: "images/agakhaniva.jpg",
+    answerText: "Shah Karim al-Hussaini (13 December 1936 – 4 February 2025), known simply as Aga Khan IV, was the 49th imam of Nizari Isma'ilism from 1957 until his death in 2025. He inherited the Nizari imamate and the title of Aga Khan at the age of 20 upon the death of his grandfather, the Aga Khan III. During his imamate, he was also known by the religious title Mawlānā Hazar Imam by his Isma'ili followers."
+  },
+  {  
+    image: "images/robertredford.png",
+    questionText: "Watergate",
+    answers: [
+      "Robert Redford"
+    ],
+    answerImage: "images/robertredforda.jpg",
+    answerText: "Charles Robert Redford Jr. (August 18, 1936 – September 16, 2025) was an American actor, director and producer, celebrated for his magnetic presence as a leading man during the American New Wave. Across a career spanning more than six decades, Redford earned widespread recognition and numerous awards, including an Academy Award, a BAFTA Award and five Golden Globe Awards, (including a Cecil B. DeMille Award in 1994). He has also received various honors including the Screen Actors Guild Life Achievement Award in 1996, the Academy Honorary Award in 2002, the Kennedy Center Honors in 2005, the Presidential Medal of Freedom in 2016 and the Honorary César in 2019."
+  },
+   {
+    image: "images/charliekirk.png",
+    questionText: "Debater",
+    answers: [
+      "Charlie Kirk",
+      "Charles Kirk"
+    ],
+    answerImage: "images/charliekirka.avif",
+    answerText: "Charles James Kirk (October 14, 1993 – September 10, 2025) was an American right-wing political activist, entrepreneur, and media personality. He co‑founded the conservative student organization Turning Point USA (TPUSA) in 2012 and served as its executive director until his assassination in 2025. A key ally of Donald Trump, he became one of the most prominent voices of the MAGA movement within the Republican Party, publishing several books and hosting The Charlie Kirk Show."
+  },
+   {
+    image: "images/frederickforsyth.png",
+    questionText: "Quote from film of one of his books 'The point is getting away with it. And speaking as a professional, that's a very important consideration.'",
+    answers: [
+      "Fred Forysth",
+      "Frederick Forsyth"
+    ],
+    answerImage: "images/frederickforsytha.webp",
+    answerText: "Frederick McCarthy Forsyth (25 August 1938 – 9 June 2025) was an English novelist and journalist. He was best known for thrillers such as The Day of the Jackal, The Odessa File, The Fourth Protocol, The Dogs of War, The Devil's Alternative, The Fist of God, Icon, The Veteran, Avenger, The Afghan, The Cobra and The Kill List."
+  },
+{
+    image: "images/jackvettriano.png",
+    questionText: "Butler on a beach",
+    answers: [
+      "Jack Vettriano"
+    ],
+    answerImage: "images/jackvettrianoa.jpg",
+    answerText: "Jack Vettriano (born Jack Hoggan, 17 November 1951 – 1 March 2025) was a Scottish painter, known for his distinctive figurative style, often depicting scenes of romance, mystery, and nostalgia. Largely self-taught, Vettriano gained international recognition with his 1992 painting The Singing Butler, which became one of the best-selling art prints in the UK."
+  },
+  {
+    image: "images/jillycooper.jpg",
+    questionText: "Rupert Campbell-Black",
+    answers: [
+      "Jilly Cooper",
+      "Jill Cooper",
+      "Gill Cooper"
+    ],
+    answerImage: "images/jillycoopera.jpg",
+    answerText: "Dame Jilly Cooper (born Jill Sallitt; 21 February 1937 – 5 October 2025) was an English author and journalist, best known for her long-running Rutshire Chronicles series. She began her career in journalism and published several works of non-fiction, including books on class, animals and marriage, before turning to fiction. Her first book was How to Stay Married, which was published in 1969. She published several collections of journalism, alongside other non-fiction volumes throughout much of her career. Cooper's first novel to be published was the romance, Emily, which appeared in 1975 and was followed by five more, as well as a volume of short stories. Cooper was also an anthologist and wrote the Little Mabel series of children's books."
+  },
+    {
+    image: "images/robreiner.png",
+    questionText: "'These go to 11'",
+    answers: [
+      "Rob Reiner",
+      "Rob Rhiner"
+    ],
+    answerImage: "images/robreinera.jpg",
+    answerText: "Robert Norman Reiner (March 6, 1947 – December 14, 2025) was an American film director, producer, screenwriter, actor, and political activist. Reiner began his career as an actor before transitioning to filmmaking, directing a series of acclaimed American studio films across multiple genres. He received numerous accolades, including two Primetime Emmy Awards and a Hugo Award, and earned nominations for an Academy Award, a British Academy Film Award, and nine Golden Globe Awards. Reiner was honoured with a star on the Hollywood Walk of Fame in 1999 and received the Chaplin Award at the Film at Lincoln Centre in 2014. Three of his films have been inducted into the National Film Registry."
+  },
+    {
+    image: "images/kimwoodburn.png",
+    questionText: "Queen of Clean",
+    answers: [
+      "Kim Woodburn"
+    ],
+    answerImage: "images/kimwoodburna.jpg",
+    answerText: "Patricia Mary \"Kim\" Woodburn (née McKenzie; 25 March 1942 – 16 June 2025) was an English television personality, writer, and expert cleaner. Known as the \"Queen of Clean\", she came to prominence by co-presenting the Channel 4 series How Clean Is Your House? (2003–2009) and its Canadian version Kim's Rude Awakenings (2007–2009). Woodburn maintained a media career that spanned over two decades and went on to appear on various reality television shows, most notably I'm a Celebrity...Get Me Out of Here! (2009) and Celebrity Big Brother (2017)."
+  },
+  {
+    image: "images/prunellascales.jpg",
+    questionText: "'Oh, Basil'",
+    answers: [
+      "Prunella Scales"
+    ],
+    answerImage: "images/prunellascalesa.jpg",
+    answerText: "Prunella Margaret Rumney West (née Illingworth; 22 June 1932 – 27 October 2025), known professionally as Prunella Scales, was an English actress. She is best known for her portrayal of Sybil Fawlty in the BBC television sitcom Fawlty Towers (1975–1979) and her performance as Queen Elizabeth II in Alan Bennett's A Question of Attribution (1991), which earned her a BAFTA nomination. She later appeared in the TV documentary series Great Canal Journeys (2014–2019), travelling waterways in the UK and abroad with her husband, the actor Timothy West."
+  },
+    {
+    image: "images/normantebbit.png",
+    questionText: "'Get on your bike'",
+    answers: [
+      "Norman Tebbit",
+      "Norman Tebit"
+    ],
+    answerImage: "images/normantebbita.jpg",
+    answerText: "Norman Beresford Tebbit, Baron Tebbit (29 March 1931 – 7 July 2025), was a British politician. A member of the Conservative Party, he served in Margaret Thatcher's Cabinet from 1981 to 1987 as Secretary of State for Employment (1981–1983), Secretary of State for Trade and Industry (1983–1985), and Chancellor of the Duchy of Lancaster and Chairman of the Conservative Party (1985–1987). He was a member of Parliament (MP) from 1970 to 1992, representing the constituencies of Epping (1970–1974) and Chingford (1974–1992)."
+  },
+    {
+    image: "images/rickyhatton.png",
+    questionText: "'The Hitman'",
+    answers: [
+      "Ricky Hatton",
+      "Ricky Haton"
+    ],
+    answerImage: "images/rickyhattona.jpg",
+    answerText: "Richard John Hatton (6 October 1978 – c. 14 September 2025), also known by nicknames such as \"The Hitman\", \"The Pride of Hyde\" and the \"People's Champion\", was a British professional boxer who competed between 1997 and 2012, and later worked as a boxing promoter and trainer. During his boxing career he held multiple world championships in the light-welterweight division, and one at welterweight. In 2005 he was named Fighter of the Year by The Ring magazine, the Boxing Writers Association of America, and ESPN."
+  },
+    {
+    image: "images/dickcheney.png",
+    questionText: "W's VP",
+    answers: [
+      "Dick Cheney",
+      "Dick Chainey",
+      "Dick Cheknee"
+    ],
+    answerImage: "images/dickcheneya.jpg",
+    answerText: "Richard Bruce Cheney (January 30, 1941 – November 3, 2025) was an American politician and businessman who served as the 46th vice president of the United States from 2001 to 2009 under President George W. Bush. His tenure is often called the most powerful vice presidency in American history, with many pundits and historians even arguing that he was the first vice president to be more powerful than the president he served under. A member of the Republican Party, Cheney previously served as White House chief of staff for President Gerald Ford, the U.S. representative for Wyoming's at-large congressional district from 1979 to 1989, and as the 17th United States secretary of defense in the administration of President George H. W. Bush. He was also considered by many to be the architect of the Iraq War."
+  },
+    {
+    image: "images/dickiebird.png",
+    questionText: "Howzat",
+    answers: [
+      "Dickie Bird"
+    ],
+    answerImage: "images/dickiebirda.webp",
+    answerText: "Harold Dennis \"Dickie\" Bird OBE (19 April 1933 – 22 September 2025) was an English cricketer and international cricket umpire. During his long umpiring career, he became a well regarded figure among players and the viewing public, not only due to his high standards as an umpire but also for humour and eccentricity."
+  },
+    {
+    image: "images/ozzyosborne.jpg",
+    questionText: "'I'm...The Prince of F'ing Darkness'",
+    answers: [
+      "Ozzy Osborne",
+      "Ozzy Osbourne",
+      "Aussie Osborne",
+      "Aussie Osbourne",
+      "Ozzie Osborne",
+      "Ozzie Osbourne"
+    ],
+    answerImage: "images/ozzyosbornea.jpg",
+    answerText: "John Michael \"Ozzy\" Osbourne (3 December 1948 – 22 July 2025) was an English singer, songwriter, and media personality. Dubbed the \"Prince of Darkness\", he is widely credited as a pioneer of heavy metal music. He co-founded the band Black Sabbath in 1968, and rose to prominence in the 1970s as their lead vocalist. He performed on the band's first eight studio albums, including Black Sabbath, Paranoid (both 1970) and Master of Reality (1971), before he was fired in 1979 due to his problems with alcohol and other drugs."
+  },
+  {
+    image: "images/sandygall.png",
+    questionText: "News at Ten",
+    answers: [
+      "Sandy Gall",
+      "Sandy Gaul"
+    ],
+    answerImage: "images/sandygalla.jpeg",
+    answerText: "Henderson Alexander Gall CMG CBE (1 October 1927 – 29 June 2025) was a Scottish journalist, author and Independent Television News (ITN) news presenter whose career as a journalist spanned more than 50 years. He began his career in journalism as a sub-editor at the Aberdeen Press and Journal in 1952 and became a foreign correspondent for the Reuters international news agency from 1953 to 1963. Gall joined ITN as a foreign reporter and troubleshooter in 1963, and also worked as a newscaster on News at Ten between 1970 and 1991. He was the Rector of the University of Aberdeen from 1978 to 1981 and founded the Sandy Gall's Afghanistan Appeal charity with his wife in 1986."
+  },
+   {
+    image: "images/tomstoppard.png",
+    questionText: "Rosencrantz and Guildenstern Are Dead",
+    answers: [
+      "Tom Stoppard",
+      "Tom Stopard"
+    ],
+    answerImage: "images/tomstopparda.jpg",
+    answerText: "Sir Tom Stoppard (born Tomáš Sträussler; 3 July 1937 – 29 November 2025) was a British playwright and screenwriter. He wrote for film, radio, stage, and television, finding prominence with plays. His work covered the themes of human rights, censorship, and political freedom, often delving into the deeper philosophical bases of society. Stoppard, a playwright of the Royal National Theatre, was one of the most internationally performed dramatists of his generation and was critically compared with William Shakespeare and George Bernard Shaw. He was knighted for his contribution to theatre in 1997 and awarded the Order of Merit in 2000."
+  },
+    {
+    image: "images/valkilmer.png",
+    questionText: "'Iceman'",
+    answers: [
+      "Val Kilmer",
+      "Val KillMyrhh",
+      "val kilma"
+    ],
+    answerImage: "images/valkilmera.jpg",
+    answerText: "Val Edward Kilmer (December 31, 1959 – April 1, 2025) was an American actor. Initially a stage actor, he later found fame as a leading man in films in a wide variety of genres, including comedies, dramas, action adventures, westerns, historical films, crime dramas, science fiction films, and fantasy films. Films in which Kilmer appeared grossed more than $3.85 billion worldwide. In 1992, the film critic Roger Ebert remarked, \"if there is an award for the most unsung leading man of his generation, Kilmer should get it\"."
+  },
+    {
+    image: "images/slystone.png",
+    questionText: "And the Family",
+    answers: [
+      "Sly Stone"
+    ],
+    answerImage: "images/slystonea.webp",
+    answerText: "Sylvester Stewart (March 15, 1943 – June 9, 2025), better known by his stage name Sly Stone, was an American musician, songwriter and record producer. He was the frontman of Sly and the Family Stone, playing a critical role in the development of psychedelic soul and funk with his pioneering fusion of soul, rock, psychedelia, and gospel in the 1960s and 1970s. AllMusic stated that \"James Brown may have invented funk, but Sly Stone perfected it,\" and credited him with \"creating a series of euphoric yet politically charged records that proved a massive influence on artists of all musical and cultural backgrounds\". Crawdaddy! has credited him as the founder of the \"progressive soul\" movement."
+  },
+    {
+    image: "images/duchessofkent.png",
+    questionText: "Loved Wimbledon",
+    answers: [
+      "Duchess of Kent",
+      "The Duchess of Kent",
+      "Katharine Duchess of Kent"
+    ],
+    answerImage: "images/duchessofkenta.webp",
+    answerText: "Katharine, Duchess of Kent (born Katharine Lucy Mary Worsley; 22 February 1933 – 4 September 2025), was a member of the British royal family. She was the wife of Prince Edward, Duke of Kent, a grandson of King George V"
+  },
+    {
+    image: "images/joannatrollope.png",
+    questionText: "Romantic Novelist",
+    answers: [
+      "Joanna Trollope",
+      "Joanna Trollop"
+    ],
+    answerImage: "images/joannatrollopea.avif",
+    answerText: "Joanna Trollope (9 December 1943 – 11 December 2025) was an English writer. She also wrote under the pseudonym of Caroline Harvey. Her novel Parson Harding's Daughter won the 1980 Romantic Novel of the Year Award by the Romantic Novelists' Association."
+  },
+    {
+    image: "images/hulkhogan.png",
+    questionText: "A wrestler",
+    answers: [
+      "Hulk Hogan"
+    ],
+    answerImage: "images/hulkhogana.avif",
+    answerText: "Terry Gene Bollea (August 11, 1953 – July 24, 2025), better known by his ring name Hulk Hogan, was an American professional wrestler and media personality. Widely regarded as one of the greatest and globally most recognized wrestling stars of all time, Hogan won multiple championships worldwide, most notably being a six-time WWF Champion. He is best known for his work in the World Wrestling Federation (WWF, now WWE) and World Championship Wrestling (WCW). Hogan also competed in promotions such as Total Nonstop Action Wrestling (TNA), the American Wrestling Association (AWA), and New Japan Pro-Wrestling (NJPW)."
+  },
+    {
+    image: "images/joanplowright.png",
+    questionText: "An actress Dame",
+    answers: [
+      "Joan Plowright",
+      "Joan Ploughright"
+    ],
+    answerImage: "images/joanplowrighta.jpg",
+    answerText: "Joan Ann Olivier, Baroness Olivier (née Plowright; 28 October 1929 – 16 January 2025), commonly known as Dame Joan Plowright, was an English actress whose career spanned over six decades. She received several accolades including two Golden Globe Awards, an Olivier Award, and a Tony Award as well as nominations for an Academy Award, two BAFTA Awards, and a Primetime Emmy Award. She was made a Dame by Queen Elizabeth II in 2004"
+  },
+    {
+    image: "images/mariannefaithfull.png",
+    questionText: "60's singer",
+    answers: [
+      "Marianne Faithfull",
+      "marianne faithful",
+      "marieanne faithful"
+    ],
+    answerImage: "images/mariannefaithfulla.jpg",
+    answerText: "Marianne Evelyn Gabriel Faithfull (29 December 1946 – 30 January 2025) was an English singer and actress who achieved popularity in the 1960s with the release of her UK top 10 single \"As Tears Go By\". She became one of the leading female artists of the British Invasion in the United States."
+  },
+    {
+    image: "images/patriciaroutledge.jpg",
+    questionText: "Hyacinth",
+    answers: [
+      "Patricia Routledge",
+      "Pat Routledge"
+    ],
+    answerImage: "images/patriciaroutledgea.avif",
+    answerText: "Dame Katherine Patricia Routledge (17 February 1929 – 3 October 2025) was an English actress and singer. She was best known for her role as Hyacinth Bucket in the BBC One comedy series Keeping Up Appearances (1990–1995), for which she was twice nominated for the BAFTA TV Award for Best Light Entertainment Performance."
+  },
+    {
+    image: "images/terencestamp.png",
+    questionText: "Priscilla, Queen of the Desert",
+    answers: [
+      "Terence Stamp",
+      "Terry Stamp"
+    ],
+    answerImage: "images/terencestampa.avif",
+    answerText: "Terence Henry Stamp (22 July 1938 – 17 August 2025) was an English actor. His filmography included a mix of cult and mainstream performances, particularly sophisticated villain roles. He received various accolades including a Golden Globe Award, a Cannes Film Festival Award as well as nominations for an Academy Award and two BAFTA Awards. He was named by Empire as one of the 100 Sexiest Film Stars of All Time in 1995."
+  },
+    {
+    image: "images/quentinwilson.png",
+    questionText: "Received the lowest ever score on Strictly",
+    answers: [
+      "Quentin Wilson"
+    ],
+    answerImage: "images/quentinwilsona.jpg",
+    answerText: "Quentin Mcdonald Willson (23 July 1957 – 8 November 2025) was an English television presenter and producer, motoring journalist, author and car dealer. He was best known as a presenter of the popular television motoring programmes Top Gear, Britain's Worst Driver and Fifth Gear."
+  },
+    {
+    image: "images/thevivienne.png",
+    questionText: "A RuPaul's Drag Race winner",
+    answers: [
+      "The Vivienne",
+      "The Vivian",
+      "Vivian",
+      "Vivienne"
+    ],
+    answerImage: "images/theviviennea.webp",
+    answerText: "James Lee Williams (12 April 1992 – 3 January 2025), known professionally as The Vivienne, was a Welsh drag queen who was the winner of the first series of RuPaul's Drag Race UK in 2019. They later competed in the seventh season of RuPaul's Drag Race All Stars in 2022 and became the first drag performer to compete on Dancing on Ice, placing third in the fifteenth series in 2023. In 2015, before the release of Drag Race UK, they were the UK drag ambassador for the American series RuPaul's Drag Race."
+  },
+    {
+    image: "images/stanleybaxter.png",
+    questionText: "Mr Majeika",
+    answers: [
+      "Stanley Baxter"
+    ],
+    answerImage: "images/stanleybaxtera.avif",
+    answerText: "Stanley Livingstone Baxter (24 May 1926 – 11 December 2025) was a Scottish actor, comedian, impressionist and author. Baxter began his career as a child actor on the BBC and later became known for his British television comedy shows The Stanley Baxter Show, The Stanley Baxter Picture Show, The Stanley Baxter Series and Mr Majeika. Baxter also wrote a number of books based on Glasgow."
+  }
     ];
 
     let currentQuestion = 0;
     let score = 0;
+    let hintUsed = false;
 
-    // Levenshtein distance for fuzzy matching
+    // Fuzzy matching (Levenshtein distance)
     function levenshtein(a, b) {
       const matrix = Array.from({ length: a.length + 1 }, () => []);
       for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
       for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
-
       for (let i = 1; i <= a.length; i++) {
         for (let j = 1; j <= b.length; j++) {
           const cost = a[i - 1] === b[j - 1] ? 0 : 1;
@@ -325,6 +506,8 @@
     function loadQuestion() {
       const q = quiz[currentQuestion];
       document.getElementById("question-image").src = q.image;
+      document.getElementById("question-text").textContent = q.questionText;
+      document.getElementById("question-text").style.display = "none"; // hidden until hint
       document.getElementById("answer-input").value = "";
       document.getElementById("feedback").textContent = "";
       document.getElementById("answer-image").style.display = "none";
@@ -334,37 +517,46 @@
       document.getElementById("next-button").style.display = "none";
       document.getElementById("next-button").textContent = "Next Question";
       document.getElementById("submit-button").disabled = false;
+      hintUsed = false;
       updateProgress();
+    }
+
+    function showHint() {
+      document.getElementById("question-text").style.display = "block";
+      hintUsed = true;
     }
 
     function submitAnswer() {
       const userAnswer = document.getElementById("answer-input").value.trim().toLowerCase();
-      const correctAnswer = quiz[currentQuestion].answer.toLowerCase();
+      const acceptableAnswers = quiz[currentQuestion].answers.map(a => a.toLowerCase());
 
-      if (isCloseEnough(userAnswer, correctAnswer)) {
-        score++;
+      const isCorrect = acceptableAnswers.some(ans => isCloseEnough(userAnswer, ans));
+
+      if (isCorrect) {
+        score += hintUsed ? 1 : 2; // 1 point if hint used, 2 if not
         document.getElementById("feedback").textContent = "✅ Correct!";
       } else {
         document.getElementById("feedback").textContent =
-          `❌ Incorrect. The correct answer was "${quiz[currentQuestion].answer}".`;
+          `❌ Incorrect. Acceptable answers were: ${acceptableAnswers.join(", ")}.`;
       }
 
       document.getElementById("score").textContent = `Score: ${score}`;
 
-      // Show the answer image and text
+      // Show answer image and text
       const answerImg = document.getElementById("answer-image");
       answerImg.src = quiz[currentQuestion].answerImage;
       answerImg.style.display = "block";
-      document.getElementById("answer-text").textContent =
-        `Answer: ${quiz[currentQuestion].answer}`;
+      document.getElementById("answer-text").textContent = quiz[currentQuestion].answerText;
 
+      // Prevent double submissions
       document.getElementById("submit-button").disabled = true;
 
-      // If last question, change button text
+      // Last question -> change button label
       if (currentQuestion === quiz.length - 1) {
         document.getElementById("next-button").textContent = "Get Final Scores";
       }
 
+      // Reveal Next/Get Final Scores button
       document.getElementById("next-button").style.display = "inline-block";
     }
 
@@ -373,8 +565,10 @@
         currentQuestion++;
         loadQuestion();
       } else {
+        // Final results
         document.getElementById("quiz-container").innerHTML =
-          `<h2>Quiz Complete!</h2><p>Your final score is ${score} out of ${quiz.length}.</p>`;
+          `<h2>Quiz Complete!</h2>
+           <p>Your final score is ${score} out of ${quiz.length * 2}.</p>`;
       }
     }
 
@@ -382,4 +576,3 @@
   </script>
 </body>
 </html>
-
